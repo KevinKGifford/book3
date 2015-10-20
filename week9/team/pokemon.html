@@ -20,7 +20,7 @@
     </section>
 
     <section id="q2" class="question">
-        <h4>What is the avearge attack point?</h4>
+        <h4>What is the average attack point?</h4>
         <div class="answer"></div>
     </section>
 
@@ -45,33 +45,33 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
     <script>
 
-function solution1(data){
+function solution1(data) {
     return data.length
 }
 
-function solution2(data){
+function solution2(data) { 
     return _.sum(_.pluck(data, 'Attack')) / data.length
 }
 
-function solution3(data){
+function solution3(data) {
     return _.pluck(data, 'Name').join(', ')
 }
 
-function solution4(data){
-    return 'TODO'
+function solution4(data) {
+    return _.pluck(_.filter(data, { 'Attack': _.max(_.pluck(data, 'Attack')) }), 'Name')
 }
 
-function solution5(data){
-    return 'TODO'
+function solution5(data) {
+    return _.pluck(_.filter(data, {'Type': 'GRASS'}), 'Name').join(', ')
 }
 
-function run(id, solutionFunc, data){
+function run(id, solutionFunc, data) {
     console.log('run solution for ' + id)
     var answer = solutionFunc(data)
     $(id).find('.answer').html(answer)
 }
 
-function loadDataThenRunSolutions(){
+function loadDataThenRunSolutions() {
     $.get({url: '/data/pokemon.small.json'})
      .done(function(data){
          console.log('got data', data)
