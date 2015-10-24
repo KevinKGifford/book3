@@ -48,11 +48,6 @@
         <div class="answer"></div>
     </section>
 
-    <section id="q8" class="question">
-        <h4>Q8: *FIXME:* Among these original tweets on 4/26/15, how many of them got retweeted within one hour?</h4>
-        <div class="answer"></div>
-    </section>
-
     <section id="q9" class="question">
         <h4>Q9: Among these original tweets on 4/26/15, what are the ten most retweeted?</h4>
         <div class="answer"></div>
@@ -60,6 +55,11 @@
 
     <section id="q10" class="question">
         <h4>Q10: Among these ten most retweeted, how many of them contain images of people?</h4>
+        <div class="answer"></div>
+    </section>
+
+    <section id="q8" class="question">
+        <h4>Q8: *FIXME:* Among these original tweets on 4/26/15, how many of them got retweeted within one hour?</h4>
         <div class="answer"></div>
     </section>
 
@@ -229,6 +229,7 @@ function solution8() {
         var deltaTimeStamp = d.originalDate.add(1, 'hours')
         return moment(deltaTimeStamp).isBefore(d.createDate) == false
     }).length
+
 }
 
 function solution9() {
