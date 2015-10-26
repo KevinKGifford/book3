@@ -48,6 +48,11 @@
         <div class="answer"></div>
     </section>
 
+    <section id="q8" class="question">
+        <h4>Q8: *FIXME:* Among these original tweets on 4/26/15, how many of them got retweeted within one hour?</h4>
+        <div class="answer"></div>
+    </section>
+
     <section id="q9" class="question">
         <h4>Q9: Among these original tweets on 4/26/15, what are the ten most retweeted?</h4>
         <div class="answer"></div>
@@ -58,18 +63,13 @@
         <div class="answer"></div>
     </section>
 
-    <section id="q8" class="question">
-        <h4>Q8: *FIXME:* Among these original tweets on 4/26/15, how many of them got retweeted within one hour?</h4>
-        <div class="answer"></div>
-    </section>
-
 </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
 
-    <script src="/js/moment.min.js"></script>
+    <script src="http://bigdatahci2015.github.io/data/js/moment.min.js"></script>
     <script>
 
 var items   // global scope (i.e., can be accessed in javascript console)
@@ -218,12 +218,16 @@ function solution8() {
         return _.first(d['* Original Tweet Created At'].split(' ')) == '4/26/15'
     })
 
+    var groups = _.groupBy(dateTweets, 'Image Id Str')
+    console.log('groups.length', _.size(groups))
+
     var image_info = _.map(dateTweets, function(d) {
         return { 'imageID': d['Image Id Str'], 
                  'originalDate': moment(d['* Original Tweet Created At']),
                  'createDate': moment(d['* Tweet Created At']) }
     })
-    // console.log('image_info', image_info)
+    console.log('image_info', image_info)
+    console.log('image_info.length', image_info.length)
 
     return findHourRetweets = _.filter(image_info, function(d) {
         var deltaTimeStamp = d.originalDate.add(1, 'hours')
