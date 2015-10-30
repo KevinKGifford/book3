@@ -54,9 +54,7 @@
       <div id="questions" class="collection with-header">
           <div class="collection-header">Questions</div>
           <section id="q1" class="question collection-item">
-              <h4>Q1a: How many tweets had "share location" enabled? (contributed by Kevin Gifford)</h4>
-              <h4>Q1b: How many users had "share location" enabled? (contributed by Kevin Gifford)</h4>
-              <h4>Q1c: Did any user enable "share location" in between subsequent tweets? (contributed by Kevin Gifford)</h4>
+              <h4>Q1: How many tweets had "share location" enabled? How many users had "share location" enabled? Did any user enable "share location" <b>in-between</b> subsequent tweets? (contributed by Kevin Gifford) <b></h4>
               <div class="answer"></div>
           </section>
 
@@ -66,12 +64,12 @@
           </section>
 
           <section id="q3" class="question collection-item">
-              <h4>question? (contributed by Parker Illig)<h4>
+              <h4>How many times was each tweet with coordinates retweeted? (contributed by Robert Kendl)<h4>
               <div class="answer"></div>
           </section>
 
           <section id="q4" class="question collection-item">
-              <h4>question? (contributed by Robert Kendl)<h4>
+              <h4>What is the average follower count for each person that tweets with coordinates? (contributed by Parker Illig)<h4>
               <div class="answer"></div>
           </section>
 
@@ -108,7 +106,7 @@ Discuss some findings
 
     </div>
   </div>
-  
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
@@ -119,23 +117,37 @@ Discuss some findings
 var items   // global scope (i.e., can be accessed in javascript console)
 
 function solution1(){
+    // Kevin Gifford
     var tweetsWithCoordinates = _.filter(items, function(d) {
         return d['Tweet Coords'] != ""
     })
-    console.log('tweetsWithCoordinates', tweetsWithCoordinates)
+    var uniquetweetsWithCoordinates = _.unique(tweetsWithCoordinates, 'User Screen Name')
 
-    // var groups = _.groupBy(dateTweets, 'Image Id Str')
-    // var counts = _.mapValues(groups, function(d) {
-    //     return d.length
-    // })
+    var string = ''
+    var evaluate = _.map(uniquetweetsWithCoordinates, function(d) {
+        var pTweets = _.filter(items, function(f) {
+            return d['User Screen Name'] == f['User Screen Name']   
+        })
+        if (_.size(pTweets) > 1) { 
+            var uniqueTweetTimestamp = d['* Tweet Created At']
+            var pTweetsTimestamp = _.map(pTweets, function(f) {
+                if (moment(d['* Tweet Created At']).isBefore(moment(f['* Tweet Created At']))) {
+                    // Found a tweet user that enabled location sharing 
+                    string += '\n ' + d['User Screen Name'] + ' first tweeted at ' + d['* Tweet Created At'] + ' then turned on Location Sharing in subsequent tweet at ' + f['* Tweet Created At'] + '! '
+                }
+            })
+        }
+    })
 
-    // var pairs = _.pairs(counts)
-    // var sorted_pairs = _.sortBy(pairs, function(d) {
-    //     return -d[1]
-    // })
-    // return sorted_pairs[0][1]
+    var groups = _.groupBy(tweetsWithCoordinates, 'User Screen Name')
+    var counts = _.mapValues(groups, function(d) {
+        return d.length
+    })
 
-    return 'TODO'
+    var string1 = 'RESULTS: ' + tweetsWithCoordinates.length + ' tweets had "share location" enabled;'
+    var string2 = '\n ' + _.size(counts) + ' unique users had "share location" enabled;'
+
+    return string1 + string2 + string
 }
 
 function solution2(){
@@ -147,7 +159,16 @@ function solution3(){
 }
 
 function solution4(){
-    return 'TODO'
+    // Parker Illig
+    var filtered = _.filter(items, function(d){
+        return d['Tweet Coords'] != ""
+    })
+    filtered = _.uniq(filtered, 'Image Id Str')
+    filtered = _.uniq(filtered, 'User Screen Name')    
+    // console.log('filtered', filtered)
+    // console.log('filtered.length', filtered.length)
+    var sum = _.sum(filtered, 'User Followers Count')
+    return (sum)/(filtered.length)
 }
 
 function solution5(){
@@ -165,7 +186,7 @@ function run(id, solutionFunc, data){
 }
 
 function loadDataThenRunSolutions(){
-  $.get({url: 'http://bigdatahci2015.github.io/data/twitter/nepal_local_tweets.json'})
+  $.get('http://bigdatahci2015.github.io/data/twitter/nepal_local_tweets.json')
     .done(function(data){
 
         items = data
@@ -184,7 +205,7 @@ function loadDataThenRunSolutions(){
      })
 }
 
-// loadDataThenRunSolutions()
+loadDataThenRunSolutions()
 
 // convert Markdown to html
 $('.markdown').each(function(){
