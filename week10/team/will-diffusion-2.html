@@ -43,13 +43,7 @@
     <div class="parallax">
       <img src="nepal.jpg">
       <h1 id="title">What are the patterns of image diffusion during the Nepal Earthquake?
-        <div class="authors">[William Farmer](http://github.com/willzfarmer)
-                             [Kevin Gifford](http://github.com/kevinkgifford)
-                             [Parker Illig](http://github.com/pail4944)
-                             [Robert Kendl](http://github.com/DomoYeti)
-                             [Andrew Krodinger](http://github.com/drewdinger)
-                             [John Raesly](http://github.com/jraesly)
-        </div>
+        <div class="authors">by William Farmer, Kevin Gifford, Parker Illig</div>
       </h1>
 
     </div>
@@ -60,36 +54,35 @@
       <div id="questions" class="collection with-header">
           <div class="collection-header">Questions</div>
           <section id="q1" class="question collection-item">
-              <h4>Q1: How many tweets had "share location" enabled? How many users had "share location" enabled? Did any user enable "share location" <b>in-between</b> subsequent tweets? (contributed by Kevin Gifford) <b></h4>
-              <div class="answer"></div>
-          </section>
-
-          <section id="q2" class="question collection-item">
-              <h4>Can we plot the tweets that have coordinates? (contributed by Will Farmer).
-               <b>Hover (place mouse) over tweets with coordinate locations (red dots) for location imagery.</b> Size of red dots indicates number of tweet followers.<h4>
+              <h4>Can we plot the tweets?? (Will Farmer)</h4>
               <div class="answer" id="map"></div>
           </section>
 
+          <section id="q2" class="question collection-item">
+              <h4>What is the average follower count for each person that tweets with coordinates? (Parker Illig)</h4>
+              <div class="answer"></div>
+          </section>
+
           <section id="q3" class="question collection-item">
-              <h4>Out of all the tweets that gave coordinates, which ones were retweeted from another source? (contributed by Robert Kendl)<h4>
+              <h4>question? (contributed by ???)</h4>
               <div class="answer"></div>
           </section>
 
           <section id="q4" class="question collection-item">
-              <h4>What is the average follower count for each person that tweets with coordinates? (contributed by Parker Illig)<h4>
+              <h4>question? (contributed by ???)</h4>
               <div class="answer"></div>
           </section>
 
           <section id="q5" class="question collection-item">
-              <h4>Which tweets got retweeted the most by user? (contributed by John Raesly)<h4>
+              <h4>question? (contributed by ???)</h4>
+              <div class="answer"></div>
+          </section>
+
+          <section id="q6" class="question collection-item">
+              <h4>question? (contributed by ???)</h4>
               <div class="answer"></div>
           </section>
       </div>
-
-          <section id="q6" class="question collection-item">
-              <h4>question? (contributed by Andrew Krodinger)<h4>
-              <div class="answer"></div>
-          </section>
 
   </div>
 
@@ -105,13 +98,15 @@
 
 # Discussion
 
-*  It is interesting that of the data set of 1463 tweets (160 different Users) that 150 out of 160 users never had "Location Sharing" enabled (hypothesize because of privacy concerns primarily; a secondary reason for disabling Location Sharing is bandwidth consumption, which is not free).
-*  However, three users did turn on Location Sharing after previously transmitting a tweet with Location Sharing disabled.  This makes intuitive sense in that these three (possible more tech-savvy?) Users chose to trade higher-fidelity information in a time of crisis and sacrifice personal privacy concerns.
+Discuss some findings
 
+# Heading 2
+
+Discuss some findings
 
     </div>
   </div>
-
+  
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
@@ -120,46 +115,9 @@
     <script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
     <script src="http://bigdatahci2015.github.io/data/js/geolib.js"></script>
     <script>
-
 var items   // global scope (i.e., can be accessed in javascript console)
 var map
-
-function solution1() {
-    // Kevin Gifford
-    var tweetsWithCoordinates = _.filter(items, function(d) {
-        return d['Tweet Coords'] != ""
-    })
-    var uniquetweetsWithCoordinates = _.unique(tweetsWithCoordinates, 'User Screen Name')
-
-    var string = ''
-    var evaluate = _.map(uniquetweetsWithCoordinates, function(d) {
-        var pTweets = _.filter(items, function(f) {
-            return d['User Screen Name'] == f['User Screen Name']   
-        })
-        if (_.size(pTweets) > 1) { 
-            var uniqueTweetTimestamp = d['* Tweet Created At']
-            var pTweetsTimestamp = _.map(pTweets, function(f) {
-                if (moment(d['* Tweet Created At']).isBefore(moment(f['* Tweet Created At']))) {
-                    // Found a tweet user that enabled location sharing 
-                    string += '\n ' + d['User Screen Name'] + ' first tweeted at ' + d['* Tweet Created At'] + ' then turned on Location Sharing in subsequent tweet at ' + f['* Tweet Created At'] + '! '
-                }
-            })
-        }
-    })
-
-    var groups = _.groupBy(tweetsWithCoordinates, 'User Screen Name')
-    var counts = _.mapValues(groups, function(d) {
-        return d.length
-    })
-
-    var string1 = 'RESULTS: ' + tweetsWithCoordinates.length + ' tweets had "share location" enabled;'
-    var string2 = '\n ' + _.size(counts) + ' unique users had "share location" enabled;'
-
-    return string1 + string2 + string
-}
-
-function solution2() {
-    // Will Farmer
+function solution1(){
    _.chain(items)
        .filter(function(obj) {
            return (obj["Tweet Coords"] != "")
@@ -183,51 +141,34 @@ function solution2() {
            });
        }).value()
 }
-
-function solution3() {
-    // Robert Kendl
-    var tweetsWithCoordinates = _.filter(items, function(d) {
-        return d['Tweet Coords'] != ""
-    })
-    var retweeted = _.filter(tweetsWithCoordinates, function(x){
-        return x['Rt'] == "Retweet"
-    })
-    return retweeted.length
-}
-
-function solution4() {
-    // Parker Illig
+function solution2(){
     var filtered = _.filter(items, function(d){
         return d['Tweet Coords'] != ""
     })
     filtered = _.uniq(filtered, 'Image Id Str')
-    filtered = _.uniq(filtered, 'User Screen Name')    
-    // console.log('filtered', filtered)
-    // console.log('filtered.length', filtered.length)
+    filtered = _.uniq(filtered, 'User Screen Name')
+    console.log(filtered)
+    console.log(filtered.length)
     var sum = _.sum(filtered, 'User Followers Count')
     return (sum)/(filtered.length)
 }
-
-function solution5() {
-    // John Raesly
-    var user = _.groupBy(items, 'Original User Name')
-    var tweets =_.mapValues(user, function(d){
-        return d.length
-    })
-    sorted = _.sortByOrder(_.pairs(tweets),function(d){return d[1]},'desc')
-    return sorted
-}
-
-function solution6() {
+function solution3(){
     return 'TODO'
 }
-
+function solution4(){
+    return 'TODO'
+}
+function solution5(){
+    return 'TODO'
+}
+function solution6(){
+    return 'TODO'
+}
 function run(id, solutionFunc, data){
     console.log('run solution for ' + id)
     var answer = solutionFunc(data)
     $(id).find('.answer').html(answer)
 }
-
 function loadDataThenRunSolutions(){
   map = L.map('map').setView([27, 85], 6)
   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
@@ -239,14 +180,11 @@ function loadDataThenRunSolutions(){
   map.touchZoom.disable()
   map.doubleClickZoom.disable()
   map.scrollWheelZoom.disable()
-
   $.get('http://bigdatahci2015.github.io/data/twitter/nepal_local_tweets.json')
     .done(function(data){
-
         items = data
         console.log('number of items loaded:', items.length)
         console.log('first item', items[0])
-
        run('#q1', solution1, items)
        run('#q2', solution2, items)
        run('#q3', solution3, items)
@@ -258,21 +196,17 @@ function loadDataThenRunSolutions(){
          console.error(err)
      })
 }
-
 loadDataThenRunSolutions()
-
 // convert Markdown to html
 $('.markdown').each(function(){
   var markdownText = $(this).text()
   $(this).html(marked(markdownText))
 })
-
 // initialize the parallax effect
 $(document).ready(function(){
   console.log($('.parallax').html())
     $('.parallax').parallax()
 })
-
     </script>
 
 </body>
