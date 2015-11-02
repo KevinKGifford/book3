@@ -65,29 +65,29 @@
           </section>
 
           <section id="q2" class="question collection-item">
-              <h4>Can we plot the tweets that have coordinates? (contributed by Will Farmer).
+              <h4>Q2: Can we plot the tweets that have coordinates? (contributed by Will Farmer).
                <b>Hover (place mouse) over tweets with coordinate locations (red dots) for location imagery.</b> Size of red dots indicates number of tweet followers.<h4>
               <div class="answer" id="map"></div>
           </section>
 
           <section id="q3" class="question collection-item">
-              <h4>Out of all the tweets that gave coordinates, which ones were retweeted from another source? (contributed by Robert Kendl)<h4>
+              <h4>Q3: Out of all the tweets that gave coordinates, which ones were retweeted from another source? (contributed by Robert Kendl)<h4>
               <div class="answer"></div>
           </section>
 
           <section id="q4" class="question collection-item">
-              <h4>What is the average follower count for each person that tweets with coordinates? (contributed by Parker Illig)<h4>
+              <h4>Q4: What is the average follower count for each person that tweets with coordinates? What's the max follower count? [Represented by size of circle on Will's leaflet]  (contributed by Parker Illig)<h4>
               <div class="answer"></div>
           </section>
 
           <section id="q5" class="question collection-item">
-              <h4>Which tweets got retweeted the most by user? (contributed by John Raesly)<h4>
+              <h4>Q5: Which tweets got retweeted the most by user? (contributed by John Raesly)<h4>
               <div class="answer"></div>
           </section>
       </div>
 
           <section id="q6" class="question collection-item">
-              <h4>question? (contributed by Andrew Krodinger)<h4>
+              <h4>Q6: question? (contributed by Andrew Krodinger)<h4>
               <div class="answer"></div>
           </section>
 
@@ -197,15 +197,32 @@ function solution3() {
 
 function solution4() {
     // Parker Illig
+    // var filtered = _.filter(items, function(d){
+    //     return d['Tweet Coords'] != ""
+    // })
+    // filtered = _.uniq(filtered, 'Image Id Str')
+    // filtered = _.uniq(filtered, 'User Screen Name')    
+    // console.log('filtered', filtered)
+    // console.log('filtered.length', filtered.length)
+    // var sum = _.sum(filtered, 'User Followers Count')
+    // return (sum)/(filtered.length)
+
     var filtered = _.filter(items, function(d){
         return d['Tweet Coords'] != ""
     })
     filtered = _.uniq(filtered, 'Image Id Str')
-    filtered = _.uniq(filtered, 'User Screen Name')    
-    // console.log('filtered', filtered)
-    // console.log('filtered.length', filtered.length)
+    filtered = _.uniq(filtered, 'User Screen Name')
+    var groups = _.mapValues(filtered, function(d){
+      return d["User Followers Count"]
+    })
+    var pairs = _.pairs(groups)
+    pairs = _.sortBy(groups, function(d){
+      return d[1]
+    })
+    var max = _.take(pairs, 1)
     var sum = _.sum(filtered, 'User Followers Count')
-    return (sum)/(filtered.length)
+    return 'The average follower count is ' + (sum)/(filtered.length) + ', and the max follower count is ' + max[0] + '.'
+
 }
 
 function solution5() {

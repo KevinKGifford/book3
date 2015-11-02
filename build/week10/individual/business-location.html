@@ -10,9 +10,24 @@
 </head>
 <body>
 
+<div style="border:1px grey solid; padding:5px;">
+    <div><h5> M-value for Matrix M x N (e.g., For a 10 x 4 matrix enter: 10)</h5>
+        <input id="arg0" type="text" value="10"/>
+    </div>
+    <div><h5> N-value for Matrix M x N (e.g., For a 10 x 4 matrix enter: 4)</h5>
+        <input id="arg1" type="text" value="5"/>
+    </div>
+    <div><h5>Processing (Normal, Efficient)</h5>
+        <input id="arg2" type="text" value="Normal"/>
+    </div>
+    <div style="margin:20px;">
+        <button id="process">Run Query</button>
+    </div>
+</div>
+
 <div class="container">
 
-    <h1>Where should we build X?</h1>
+    <h1>Where should we build another McDonald's in the greater Phoenix area?</h1>
 
     <section id="candidates" class="question">
         <h4>Where are the candidate locations?</h4>
@@ -32,19 +47,58 @@
 
     <script>
 
+// vars arg0, arg1 are global
+var arg0 = 10
+var arg1 = 5
+var already_initialized = 0
+
 //
 // Candidate Locations
 //
 
-function getCandidateLocations(){
-  var locations = []
-  locations.push({latitude: 33.45, longitude: -112.03})
-  locations.push({latitude: 33.45, longitude: -112.04})
-  locations.push({latitude: 33.45, longitude: -112.05})
-  locations.push({latitude: 33.45, longitude: -112.06})
-  locations.push({latitude: 33.45, longitude: -112.07})
-  locations.push({latitude: 33.45, longitude: -112.08})
-  return locations
+function getCandidateLocations(origin, m, n){
+    var locations = []
+    console.log('m, n: ', m +', ' + n)
+
+    var lat_start = origin[0]
+    var lat_end = _.round(origin[0] + .01 * (n), 3) - 0.001
+    var lat_step = 0.010
+    console.log('lat_start = ' + lat_start + ', ' + 'lat_end = ' + lat_end + ', ' + 'lat_step = ' + lat_step) 
+    var long_start = origin[1]
+    var long_end = _.round(origin[1] + .01 * (m), 3)
+    var long_step = 0.010
+    console.log('long_start = ' + long_start + ', ' + 'long_end = ' + long_end + ', ' + 'long_step = ' + long_step) 
+    
+    // _.range(origin[0], origin[0] + .01 * (n), .01).forEach(function(lat) {
+    _.range(lat_start, lat_end, lat_step).forEach(function(lat) {
+        // _.range(origin[1], origin[1] + .01 * (m), .01).forEach(function(lng) {
+        _.range(long_start, long_end, long_step).forEach(function(lng) {
+            locations.push({latitude: _.round(lat, 3), longitude: _.round(lng, 3)})
+        })
+    })
+    console.log('locations', locations)
+    return locations
+}
+
+//
+// Returns an array of businesses within distance miles from location.
+//
+function nearbyBusinesses(location, distance){
+    return _.filter(items, function(item){
+        var loc2  = _.pick(item, ['latitude', 'longitude'])
+        var d = geolib.getDistance(location, loc2)
+        return geolib.convertUnit('mi', d) <  distance
+    })
+}
+
+// 
+// Returns a list of nearby businesses for each location.
+//
+
+function getNearbyBusinesses(locations, distance) {
+    return _.map(locations, function(loc) {
+        return nearbyBusinesses(loc, distance)
+    })
 }
 
 
@@ -52,45 +106,93 @@ function getCandidateLocations(){
 // Scoring Functions
 //
 
-function has_some_feature_1(loc){
-  // TODO
-  return true
+function has_no_mcdonalds_within_two_miles(loc) {
+    // No McDonald's within two miles; Get businesses within 2 mile radius
+    var nearbyBusinesses = _.filter(items, function(item){
+        var loc2  = _.pick(item, ['latitude', 'longitude'])
+        var d = geolib.getDistance(loc, loc2)
+        return geolib.convertUnit('mi', d) < 2
+    })
+    var hasAtLeastOneMcDonald = _.some(nearbyBusinesses, function (business){
+        return business.name.match(/McDonald/)
+    })
+    return hasAtLeastOneMcDonald == 0
 }
 
-function has_some_feature_2(loc){
-  // TODO
-  return false
+function has_at_least_ten_businesses_with_100_or_more_reviews_within_one_mile(loc) {
+    // Has at least ten businesses with 100 or more reviews within one mile
+    var nearbyBusinesses = _.filter(items, function(item) {
+        var loc2  = _.pick(item, ['latitude', 'longitude'])
+        var d = geolib.getDistance(loc, loc2)
+        return geolib.convertUnit('mi', d) < 1
+    })
+    var frequentlyReviewedBusinsses = _.filter(nearbyBusinesses, function (business){
+        return business.review_count >= 100
+    })
+    return frequentlyReviewedBusinsses.length > 10
 }
 
-function has_some_feature_3(loc){
-  // TODO
-  return true
+function has_zoo_within_five_miles(loc) {
+    // Has zoo within five miles
+    var zoos = _.filter(items, function(d) {
+        return _.includes(d.categories, 'Zoos')
+    })
+    var nearbyzoos = _.filter(zoos, function(d) {
+        var loc2 = _.pick(d, ['latitude', 'longitude'])
+        var dis = geolib.getDistance(loc, loc2)
+        return geolib.convertUnit('mi', dis) < 5
+    })
+    return nearbyzoos.length >= 1
 }
 
-function has_some_feature_4(loc){
-  // TODO
-  return false
+function has_no_adult_entertainment_within_1_mile(loc) {
+    // Has no adult entertainment within 1 mile
+    var adult = _.filter(items, function(d) {
+        return _.includes(d.categories, 'Adult Entertainment')
+    })
+    var nearbyadult = _.filter(adult, function(d) {
+        var loc2 = _.pick(d, ['latitude', 'longitude'])
+        var dis = geolib.getDistance(loc, loc2)
+        return geolib.convertUnit('mi', dis) < 1
+    })
+    return nearbyadult.length == 0
 }
 
-function has_some_feature_5(loc){
-  // TODO
-  return false
+function has_at_least_one_museum_within_5_miles(loc) {
+    // Has at least one museum within a mile
+    var nearbyBusinesses = _.filter(items, function(item) {
+        var loc2  = _.pick(item, ['latitude', 'longitude'])
+        var d = geolib.getDistance(loc, loc2)
+        return geolib.convertUnit('mi', d) < 5
+    })
+    var hasAtLeastOneNearbyMuseum = _.some(nearbyBusinesses, function (business) {
+        return _.includes(business.categories, "Museums")
+    })
+    return hasAtLeastOneNearbyMuseum
 }
 
 //
 // Compute a score for a location using the provided scoring function 'scoreFunc'
 // and visualization function 'vizFunc'
 //
-function scoreAndVisualize(locs, scoreFunc, vizFunc){
+function scoreAndVisualize(locs, businesses, scoreFunc, vizFunc){
 
   console.time('scoring ' + scoreFunc.name)
-  var scores = _.map(locs, scoreFunc)
+  var scores = _.map(locs, function(loc, i) {
+    return scoreFunc(loc, businesses[i])
+  })
   console.timeEnd('scoring ' + scoreFunc.name)
 
+  console.log('scoreAndVisualize setting title')
   var title = _.startCase(scoreFunc.name)
+  console.log('scoreAndVisualize setting section')
   var section = $('<section><h4>' + title + '</h4><div class="map"></div></section>').appendTo('#features')
+  console.log('scoreAndVisualize setting mapElement')
   var mapElement = $(section).find('.map')[0]
+  console.log('scoreAndVisualize mapElement', mapElement)
+  console.log('scoreAndVisualize calling vizFunc')
   vizFunc(mapElement, locs, scores)
+  console.log('scoreAndVisualize DONE')
 }
 
 //
@@ -98,17 +200,19 @@ function scoreAndVisualize(locs, scoreFunc, vizFunc){
 //
 
 // visualize a list of locations on a map
-function visualize(domElement, locs){
-    var map = L.map(domElement).setView([33.45, -112.06], 13)
-    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a       href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-        maxZoom: 18,
-        id: 'doubleshow.noeko77m',
-        accessToken: 'pk.eyJ1IjoiZG91Ymxlc2hvdyIsImEiOiJjaWZ5Y3B1eTE1MHRidWRtMG9uZXluajg4In0.u5ONW27Ly5cU7M5KYi6Y9Q'
-    }).addTo(map)
-    map.touchZoom.disable()
-    map.doubleClickZoom.disable()
-    map.scrollWheelZoom.disable()
+function visualize(domElement, locs) {
+    if (already_initialized == 0) { 
+        var map = L.map(domElement).setView([33.450, -112.060], 13)
+        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a       href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+            maxZoom: 18,
+            id: 'doubleshow.noeko77m',
+            accessToken: 'pk.eyJ1IjoiZG91Ymxlc2hvdyIsImEiOiJjaWZ5Y3B1eTE1MHRidWRtMG9uZXluajg4In0.u5ONW27Ly5cU7M5KYi6Y9Q'
+        }).addTo(map)
+        map.touchZoom.disable()
+        map.doubleClickZoom.disable()
+        map.scrollWheelZoom.disable()
+    }
 
     _.forEach(locs, function(loc){
       var latlng = [loc.latitude, loc.longitude]
@@ -122,17 +226,19 @@ function visualize(domElement, locs){
 
 // visualize a list of locations on a map
 // represent each location's score using green (TRUE) or red (FALSE)
-function visualize_true_or_false(domElement, locs, scores){
-    var map = L.map(domElement).setView([33.45, -112.06], 13)
-    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+function visualize_true_or_false(domElement, locs, scores) {
+    if (already_initialized == 0) { 
+        var map = L.map(domElement).setView([33.450, -112.060], 13)
+        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a       href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 18,
         id: 'doubleshow.noeko77m',
         accessToken: 'pk.eyJ1IjoiZG91Ymxlc2hvdyIsImEiOiJjaWZ5Y3B1eTE1MHRidWRtMG9uZXluajg4In0.u5ONW27Ly5cU7M5KYi6Y9Q'
     }).addTo(map)
-    map.touchZoom.disable()
-    map.doubleClickZoom.disable()
-    map.scrollWheelZoom.disable()
+        map.touchZoom.disable()
+        map.doubleClickZoom.disable()
+        map.scrollWheelZoom.disable()
+    }
 
     _.forEach(locs, function(loc, i){
 
@@ -154,41 +260,74 @@ function visualize_true_or_false(domElement, locs, scores){
 }
 
 var items = []
-function loadDataThenRunSolutions(){
+function loadDataThenRunSolutions(arg0, arg1) {
 
-  var locs = getCandidateLocations()
-  visualize($('#candidates .map')[0], locs)
+    console.log('loadDataThenRunSolutions: arg0 = ', arg0)
+    console.log('loadDataThenRunSolutions: arg1 = ', arg1)
 
-  $.get({url: 'http://bigdatahci2015.github.io/data/yelp/yelp_academic_dataset_business.phoenix.json.lines.txt'})
-   .done(function(data){
-      var lines = data.trim().split('\n')
+    var locs = getCandidateLocations([33.440, -112.100], arg0, arg1)
+    console.log('loadDataThenRunSolutions got locs')
+    var businesses = getNearbyBusinesses(locs, 2) 
+    console.log('loadDataThenRunSolutions got businesses')
 
-      // convert text lines to json arrays and save them in `items`
-      items = _.map(lines, JSON.parse)
+    console.log('loadDataThenRunSolutions calling visualize')
+    visualize($('#candidates .map')[0], locs)  // Here error in getting recalled
+    console.log('loadDataThenRunSolutions returned from visualize')
 
-      // take only the last 2000 to speed up computation
-      // TODO: comment this out before the final submission
-      items = _.takeRight(items, 2000)
+    if (already_initialized == 0) {
 
-      console.log('number of items loaded:', items.length)
-      console.log('first item:', items[0])
+        // visualize($('#candidates .map')[0], locs)  // Here error in scoreAndVisualize calling vizFunc
 
-      console.log('scoring all candidate locations')
+        $.get({url: 'http://bigdatahci2015.github.io/data/yelp/yelp_academic_dataset_business.phoenix.json.lines.txt'}).done(function(data) {
 
-      scoreAndVisualize(locs, has_some_feature_1, visualize_true_or_false)
-      scoreAndVisualize(locs, has_some_feature_2, visualize_true_or_false)
-      scoreAndVisualize(locs, has_some_feature_3, visualize_true_or_false)
-      scoreAndVisualize(locs, has_some_feature_4, visualize_true_or_false)
-      scoreAndVisualize(locs, has_some_feature_5, visualize_true_or_false)
+            var lines = data.trim().split('\n')
 
-   })
-   .fail(function(err){
-       console.error(err)
-   })
+            // convert text lines to json arrays and save them in `items`
+            items = _.map(lines, JSON.parse)
+
+            // take only the last 2000 to speed up computation
+            // TODO: comment this out before the final submission
+            // items = _.takeRight(items, 500)
+
+            console.log('number of items loaded:', items.length)
+            console.log('first item:', items[0])
+
+            console.log('scoring all candidate locations')
+
+            console.log('Initializing...')
+            scoreAndVisualize(locs, businesses, has_no_mcdonalds_within_two_miles, visualize_true_or_false)
+            scoreAndVisualize(locs, businesses, has_at_least_ten_businesses_with_100_or_more_reviews_within_one_mile, visualize_true_or_false)
+            scoreAndVisualize(locs, businesses, has_zoo_within_five_miles, visualize_true_or_false)
+            scoreAndVisualize(locs, businesses, has_no_adult_entertainment_within_1_mile, visualize_true_or_false)
+            scoreAndVisualize(locs, businesses, has_at_least_one_museum_within_5_miles, visualize_true_or_false)
+            already_initialized = 1
+
+        }).fail(function(err){
+            console.error(err)
+        })
+    }
+    else {
+        console.log('Already initialized, process user form request...')
+        scoreAndVisualize(locs, businesses, has_no_mcdonalds_within_two_miles, visualize_true_or_false)
+        scoreAndVisualize(locs, businesses, has_at_least_ten_businesses_with_100_or_more_reviews_within_one_mile, visualize_true_or_false)
+        scoreAndVisualize(locs, businesses, has_zoo_within_five_miles, visualize_true_or_false)
+        scoreAndVisualize(locs, businesses, has_no_adult_entertainment_within_1_mile, visualize_true_or_false)
+        scoreAndVisualize(locs, businesses, has_at_least_one_museum_within_5_miles, visualize_true_or_false)
+    }
 }
 
-loadDataThenRunSolutions()
+$('button#process').click(function() {
+    arg0 = $('input#arg0').val()
+    arg1 = $('input#arg1').val()
+    console.log('--> arg0', arg0)
+    console.log('--> arg1', arg1)
+    loadDataThenRunSolutions(arg0, arg1)
+})
+
+// Runs this command to initiate processing
+loadDataThenRunSolutions(arg0, arg1)
 
     </script>
 </body>
 </html>
+
