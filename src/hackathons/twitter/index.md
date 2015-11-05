@@ -94,12 +94,12 @@ correctly, and also what other teams are up to in real-time.
 
 The team members who contributed to this hackathon are:
 
-- (Name)
-- (Name)
-- (Name)
-- (Name)
-- (Name)
-- (Name)
+* [William Farmer](http://github.com/willzfarmer)
+* [Kevin Gifford](http://github.com/kevinkgifford)
+* [Parker Illig](http://github.com/pail4944)
+* [Robert Kendl](http://github.com/DomoYeti)
+* [Andrew Krodinger](http://github.com/drewdinger)
+* [John Raesly](http://github.com/jraesly)
 
 ## Grading
 
@@ -109,16 +109,27 @@ Each person must implement at least ONE detector function. It must be meaningful
 
 Our team came up with the following interesting events:
 
-1. Has observed .... ? contributed by (Name)
+1. Has observed a tweet about either the 'Kremlin' or 'Putin' (contributed by Kevin Gifford)
+
+  (Both the actions of Vladimir Putin and the Kremlin are of political interest)
+
+1. Has observed .... ? (contributed by Will Farmer)
 
   (one sentence justification why this event is interesting)
 
-1. Has observed .... ? contributed by (Name)
+1. Has observed .... ? (contributed by Parker Illig)
 
   (one sentence justification why this event is interesting)
 
-1. Has observed .... ? contributed by (Name)
+1. Has observed .... ? (contributed by Robery Kendl)
 
   (one sentence justification why this event is interesting)
 
-(add more until you hit N where N is the number of people on your team)
+1. Has observed .... ? (contributed by Andrew Krodinger)
+
+  (one sentence justification why this event is interesting)
+
+1. Has observed .... ? (contributed by John Raesly)
+
+  (one sentence justification why this event is interesting)
+
