@@ -38,7 +38,7 @@
     <div class="parallax">
       <img src="cloud.jpg">
       <h1 id="title">What is everyone in the class's activity?
-        <div class="authors">by Name</div>
+        <div class="authors">by Kevin K. Gifford</div>
       </h1>
     </div>
   </div>
@@ -134,11 +134,12 @@ function analyze(events){
 }
 
 function how_many_individuals_analyzed_so_far(events){
+  console.log('events', events)
   return _.keys(events).length
 }
 
 function whose_data_is_available(events){
-  return _.keys(events).join(' , ')
+  return _.keys(events).join(', ')
 }
 
 function question1(events){

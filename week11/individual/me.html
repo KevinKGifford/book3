@@ -119,28 +119,31 @@ function how_many_emails_have_i_received_since(events) {
 
 function how_many_emails_from_NASA(events) {
   var nasa = _.filter(array, function(d) {
-    return _.includes(d.email_sender, 'NASA')
+    return ( _.includes(d.email_sender, 'NASA') || _.includes(d.email_sender, 'IAF') )
   }).length
   return 'I received ' + nasa + ' emails from NASA related entities.'
 }
 
 function how_many_emails_from_professional_societies(events) {
   var professional = _.filter(array, function(d) {
-    return _.includes(d.email_sender, 'IEEE')
+    return ( _.includes(d.email_sender, 'IEEE') || _.includes(d.email_sender, 'AIAA') ||
+             _.includes(d.email_sender, 'EETimes') || _.includes(d.email_sender, 'ResearchGate') )
   }).length
   return 'I received ' + professional + ' emails from professional societies.'
 }
 
 function how_many_emails_from_public_safety(events) {
   var publicSafety = _.filter(array, function(d) {
-    return _.includes(d.email_sender, 'HS')
+    return ( _.includes(d.email_sender, 'HS') || _.includes(d.email_sender, 'USAJOBS') ||
+             _.includes(d.email_sender, 'IWCE') || _.includes(d.email_sender, 'MissionCritical') )
   }).length
   return 'I received ' + publicSafety + ' emails from Public Safety related entities.'
 }
 
 function how_many_emails_from_space_data_standards(events) {
   var wireless = _.filter(array, function(d) {
-    return ( _.includes(d.email_subject, 'CCSDS') || _.includes(d.email_subject, 'CESG')  || _.includes(d.email_subject, 'wireless') )
+    return ( _.includes(d.email_subject, 'CCSDS') || _.includes(d.email_subject, 'CESG')  || 
+             _.includes(d.email_subject, 'wireless') || _.includes(d.email_subject, 'Cesg') )
   }).length
   return 'I received ' + wireless + ' emails from CCSDS and wireless related activities.'
 }
@@ -181,7 +184,7 @@ function how_many_emails_from_LoRa(events) {
   var loRa = _.filter(array, function(d) {
     return ( _.includes(d.email_sender, 'LoRa') || _.includes(d.email_subject, 'LoRa') )
   }).length
-  return 'I received ' + loRa + ' emails from LoRa (IoT standardization) activitiesd.'
+  return 'I received ' + loRa + ' emails from LoRa (IoT standardization) activities.'
 }
 
 function how_many_emails_from_vint_cerf(events) {
