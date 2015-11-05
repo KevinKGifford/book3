@@ -1,0 +1,202 @@
+<html>
+<head>
+  <title>Me</title>
+    <style>
+        .answer {
+            min-height: 50px
+        }
+        section{
+          padding: 10px;
+          margin-bottom: 12px
+        }
+        #title {
+          position: absolute;
+          padding: 20px;
+          font-size: 64px;
+          font-weight: bolder;
+          color: white;
+          top: 50px;
+          left: 0px;
+          text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black
+        }
+        #title .authors {
+          padding: 20px;
+          font-size: 32px;
+          font-weight: bolder;
+          color: #BBB;
+          text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black
+        }
+        #tweets {
+          min-height: 300px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/css/materialize.min.css">
+</head>
+<body>
+
+  <div class="parallax-container"  style="height:300px">
+    <div class="parallax">
+      <img src="cloud.jpg">
+      <h1 id="title">What is my online activity?
+        <div class="authors">by Kevin K. Gifford</div>
+      </h1>
+    </div>
+  </div>
+
+  <div class="section white container flow-text">
+      <div id="questions" class="col s10 collection">
+      </div>
+  </div>
+
+  <script src="https://cdn.firebase.com/js/client/2.3.1/firebase.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.5/marked.min.js"></script>
+  <script>
+
+var PERSONAL_FIREBASE_URL = 'https://kevinkgifford-bigdata-hci.firebaseio.com/'
+
+// add the personal firebase url to the class's firebase
+
+// load events from the personal firebase
+var personal_firebase = new Firebase(PERSONAL_FIREBASE_URL)
+personal_firebase
+  .child('events')
+  .on('value', function(snapshot){
+    var events = snapshot.val()
+    analyze(events)
+})
+
+function ask(func, events){
+  var answer = func(events)
+
+  // html element to display the answer
+  var answerHtml = '<div class="collection-item answer">' +
+      '<h4>' + _.startCase(func.name) + '? </h4>' +
+      '<div>' + answer + '</div>'
+    '</div>'
+
+  // append to #quetions
+  $('#questions').append(answerHtml)
+}
+
+function analyze(events){
+  console.log(events)
+
+  ask(when_did_i_start_collecting, events)
+  ask(how_many_emails_have_i_received_since, events)
+  ask(how_many_emails_from_NASA, events)
+  ask(how_many_emails_from_professional_societies, events)
+  ask(how_many_emails_from_public_safety, events)
+  ask(how_many_emails_from_space_data_standards, events)
+  ask(how_many_emails_from_NSF, events)
+  ask(how_many_emails_regarding_IoT, events)
+  ask(how_many_emails_regarding_DTN, events)
+  ask(how_many_emails_from_CSCI_4830, events)
+  ask(how_many_emails_from_LoRa, events)
+  ask(how_many_emails_from_vint_cerf, events)
+}
+
+var array
+var email_count
+
+function when_did_i_start_collecting(events) {
+  array = _.values(events.gmail)
+  email_count = _.values(events.gmail).length
+  console.log('events.gmail', events.gmail)
+  console.log('email_count', email_count)
+  console.log('_.values(events.gmail)', _.values(events.gmail))
+  console.log('array', array)
+  console.log('array[0]', array[0])
+  return 'I started collecting from ' + array[0].email_date
+}
+
+function how_many_emails_have_i_received_since(events) {
+  return 'I received ' + _.values(events.gmail).length + ' total emails since starting the analysis.'
+}
+
+function how_many_emails_from_NASA(events) {
+  var nasa = _.filter(array, function(d) {
+    return _.includes(d.email_sender, 'NASA')
+  }).length
+  return 'I received ' + nasa + ' emails from NASA related entities.'
+}
+
+function how_many_emails_from_professional_societies(events) {
+  var professional = _.filter(array, function(d) {
+    return _.includes(d.email_sender, 'IEEE')
+  }).length
+  return 'I received ' + professional + ' emails from professional societies.'
+}
+
+function how_many_emails_from_public_safety(events) {
+  var publicSafety = _.filter(array, function(d) {
+    return _.includes(d.email_sender, 'HS')
+  }).length
+  return 'I received ' + publicSafety + ' emails from Public Safety related entities.'
+}
+
+function how_many_emails_from_space_data_standards(events) {
+  var wireless = _.filter(array, function(d) {
+    return ( _.includes(d.email_subject, 'CCSDS') || _.includes(d.email_subject, 'CESG')  || _.includes(d.email_subject, 'wireless') )
+  }).length
+  return 'I received ' + wireless + ' emails from CCSDS and wireless related activities.'
+}
+
+function how_many_emails_from_NSF(events) {
+  var nsf = _.filter(array, function(d) {
+    return _.includes(d.email_sender, 'National Science Foundation')
+  }).length
+  return 'I received ' + nsf + ' emails from the NSF.'
+}
+
+function how_many_emails_regarding_IoT(events) {
+  var iot = _.filter(array, function(d) {
+    return _.includes(d.email_subject, 'IoT')
+  }).length
+  return 'I received ' + iot + ' emails from IoT related activities.'
+}
+
+function how_many_emails_regarding_DTN(events) {
+  var dtn = _.filter(array, function(d) {
+    return ( _.includes(d.email_subject, 'dtn') || _.includes(d.email_subject, 'DTN') )
+  }).length
+  return 'I received ' + dtn + ' emails from Disruption tolerant Networking (DTN) activities.'
+}
+
+function how_many_emails_from_CSCI_4830(events) {
+  var csci4830 = _.filter(array, function(d) {
+    return ( _.includes(d.email_subject, '[forum]') || _.includes(d.email_sender, 'Yeh')  ||
+             _.includes(d.email_sender, 'Illig') || _.includes(d.email_sender, 'Zebulon') ||
+             _.includes(d.email_sender, 'Krodinger') || _.includes(d.email_sender, 'Kendl') ||
+             _.includes(d.email_sender, 'Kendl') || _.includes(d.email_sender, 'Raesly') ||
+             _.includes(d.email_sender, '4830') || _.includes(d.email_sender, 'Foobar') )
+  }).length
+  return 'I received ' + csci4830 + ' emails from CSCI-4830 related-activities.'
+}
+
+function how_many_emails_from_LoRa(events) {
+  var loRa = _.filter(array, function(d) {
+    return ( _.includes(d.email_sender, 'LoRa') || _.includes(d.email_subject, 'LoRa') )
+  }).length
+  return 'I received ' + loRa + ' emails from LoRa (IoT standardization) activitiesd.'
+}
+
+function how_many_emails_from_vint_cerf(events) {
+  var vint = _.filter(array, function(d) {
+    return _.includes(d.email_sender, 'vint')
+  }).length
+  return 'I received ' + vint + ' emails from Vint Cerf, co-founder and "father" of the Internet.'
+}
+
+// initialize the parallax effect
+$(document).ready(function(){
+    $('.parallax').parallax()
+})
+
+    </script>
+
+</body>
+</html>
