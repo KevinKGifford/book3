@@ -121,9 +121,9 @@ function analyze(events){
 
   ask(how_many_individuals_analyzed_so_far, events)
   ask(whose_data_is_available, events)
-  ask(question1, events)
-  ask(question2, events)
-  ask(question3, events)
+  ask(who_has_the_most_emails, events)
+  ask(who_has_twitter_feeds, events)
+  ask(who_has_github_info, events)
   ask(question4, events)
   ask(question5, events)
   ask(question6, events)
@@ -139,18 +139,55 @@ function how_many_individuals_analyzed_so_far(events){
 }
 
 function whose_data_is_available(events){
+  var id_keys = _.keys(events)
+  console.log('================================')
+  console.log('id_keys', id_keys)
+
+  var id_values = _.values(events)
+  console.log('id_values', id_values)
+
+  var filtered_objects = _.filter(id_values, function(d) {
+    return _.isObject(d)
+  })
+  console.log('filtered_objects', filtered_objects)
+  console.log('--------------------------------')
+
+  var feeds = _.map(filtered_objects, function(d) {
+    // _.keys(d) are the names of the feeds (gmail, twitter, MeetUp, etc.)
+    console.log('map(d) _.keys(d)', _.keys(d))
+    console.log('map(d) _.values(d)', _.values(d))
+    var feeds2 = _.map(d, function(f) {
+      console.log('map(f) _.keys(f)', _.keys(f))
+      console.log('map(f) _.values(f)', _.values(f))
+      console.log('map(f) _.values(f).length', _.values(f).length)
+    })
+    console.log('--------------------------------')
+  })
+
+  // var online_values = _.values(id_values)
+  // console.log('online_values', online_values)
+  // var pairs = _.pairs(filtered_values)
+  // console.log('pairs', pairs)
+  // var array = _.values(events.gmail)
+  // var email_count = _.values(events.gmail).length
+  // console.log('events.gmail', events.gmail)
+  // console.log('email_count', email_count)
+  // console.log('_.values(events.gmail)', _.values(events.gmail))
+  // console.log('array', array)
+  // console.log('array[0]', array[0])
+
   return _.keys(events).join(', ')
 }
 
-function question1(events){
+function who_has_the_most_emails(events){
   return '...'
 }
 
-function question2(events){
+function who_has_twitter_feeds(events){
   return '...'
 }
 
-function question3(events){
+function who_has_github_info(events){
   return '...'
 }
 

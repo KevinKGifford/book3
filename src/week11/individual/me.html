@@ -131,7 +131,8 @@ function how_many_emails_from_professional_societies(events) {
   var professional = _.filter(array, function(d) {
     return ( _.includes(d.email_sender, 'IEEE') || _.includes(d.email_sender, 'AIAA') ||
              _.includes(d.email_sender, 'EETimes') || _.includes(d.email_sender, 'ResearchGate') ||
-             _.includes(d.email_sender, 'ACM') )
+             _.includes(d.email_sender, 'ACM') || _.includes(d.email_sender, 'RFID') || 
+             _.includes(d.email_sender, 'TIA') )
   }).length
   emails_classified += professional
   return 'I received ' + professional + ' emails from professional societies.'
@@ -177,7 +178,7 @@ function how_many_emails_regarding_DTN(events) {
     return ( _.includes(d.email_subject, 'dtn') || _.includes(d.email_subject, 'DTN') )
   }).length
   emails_classified += dtn
-  return 'I received ' + dtn + ' emails from Disruption tolerant Networking (DTN) activities.'
+  return 'I received ' + dtn + ' emails from Disruption Tolerant Networking (DTN) activities.'
 }
 
 function how_many_emails_from_CSCI_4830(events) {
