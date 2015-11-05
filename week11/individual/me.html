@@ -186,7 +186,7 @@ function how_many_emails_from_LoRa(events) {
 
 function how_many_emails_from_vint_cerf(events) {
   var vint = _.filter(array, function(d) {
-    return _.includes(d.email_sender, 'vint')
+    return ( _.includes(d.email_sender, 'Vint') || _.includes(d.email_sender, 'vint') )
   }).length
   return 'I received ' + vint + ' emails from Vint Cerf, co-founder and "father" of the Internet.'
 }
