@@ -121,102 +121,152 @@ function analyze(events){
 
   ask(how_many_individuals_analyzed_so_far, events)
   ask(whose_data_is_available, events)
-  ask(who_has_the_most_emails, events)
-  ask(who_has_twitter_feeds, events)
-  ask(who_has_github_info, events)
-  ask(question4, events)
-  ask(question5, events)
-  ask(question6, events)
-  ask(question7, events)
-  ask(question8, events)
-  ask(question9, events)
-  ask(question10, events)
+  ask(how_many_total_online_feeds, events)
+  ask(what_are_the_different_online_feeds_for_the_class_members, events)
+  ask(how_many_members_have_a_twitter_or_gmail_or_github_feed, events)
+  ask(what_is_the_most_popular_online_feed, events)
+  ask(what_is_the_max_number_of_feeds_for_a_user, events)
+  ask(what_is_the_min_number_of_feeds_for_a_user, events)
+  ask(what_is_max_event_count_for_a_user_feed, events)
+  ask(what_is_average_event_count_for_a_user_feed, events)
+  ask(what_is_min_event_count_for_a_user_feed, events)
 }
 
 function how_many_individuals_analyzed_so_far(events){
-  console.log('events', events)
+  // console.log('events', events)
   return _.keys(events).length
 }
 
-function whose_data_is_available(events){
-  var id_keys = _.keys(events)
-  console.log('================================')
-  console.log('id_keys', id_keys)
-
-  var id_values = _.values(events)
-  console.log('id_values', id_values)
-
-  var filtered_objects = _.filter(id_values, function(d) {
-    return _.isObject(d)
-  })
-  console.log('filtered_objects', filtered_objects)
-  console.log('--------------------------------')
-
-  var feeds = _.map(filtered_objects, function(d) {
-    // _.keys(d) are the names of the feeds (gmail, twitter, MeetUp, etc.)
-    console.log('map(d) _.keys(d)', _.keys(d))
-    console.log('map(d) _.values(d)', _.values(d))
-    var feeds2 = _.map(d, function(f) {
-      console.log('map(f) _.keys(f)', _.keys(f))
-      console.log('map(f) _.values(f)', _.values(f))
-      console.log('map(f) _.values(f).length', _.values(f).length)
-    })
-    console.log('--------------------------------')
-  })
-
-  // var online_values = _.values(id_values)
-  // console.log('online_values', online_values)
-  // var pairs = _.pairs(filtered_values)
-  // console.log('pairs', pairs)
-  // var array = _.values(events.gmail)
-  // var email_count = _.values(events.gmail).length
-  // console.log('events.gmail', events.gmail)
-  // console.log('email_count', email_count)
-  // console.log('_.values(events.gmail)', _.values(events.gmail))
-  // console.log('array', array)
-  // console.log('array[0]', array[0])
-
+function whose_data_is_available(events) {
   return _.keys(events).join(', ')
 }
 
-function who_has_the_most_emails(events){
-  return '...'
+function how_many_total_online_feeds(events){
+  var userEvents = _.values(events)
+  var userFeeds = _.map(userEvents, function(d) {
+    return _.keys(d)
+  })
+
+  // Ensure userFeeds are unique and filter invalid entries/configuration
+  var uniqueFeeds = _.unique(_.flatten(userFeeds))
+  var filteredFeeds = _.filter(uniqueFeeds, function(d) {
+    return !(_.startsWith(d, '-K2'))
+  })
+  return filteredFeeds.length
 }
 
-function who_has_twitter_feeds(events){
-  return '...'
+function what_are_the_different_online_feeds_for_the_class_members(events){
+  var userEvents = _.values(events)
+  var userFeeds = _.map(userEvents, function(d) {
+    return _.keys(d)
+  })
+
+  // Ensure userFeeds are unique and filter invalid entries/configuration
+  var uniqueFeeds = _.unique(_.flatten(userFeeds))
+  var filteredFeeds = _.filter(uniqueFeeds, function(d) {
+    return !(_.startsWith(d, '-K2'))
+  })
+  return filteredFeeds.join(', ')
 }
 
-function who_has_github_info(events){
-  return '...'
+function how_many_members_have_a_twitter_or_gmail_or_github_feed(events){
+  var userEvents = _.values(events)
+  var userFeeds = _.flatten(_.map(userEvents, function(d) {
+    return _.keys(d)
+  }))
+  filteredFeeds = _.filter(userFeeds, function(d) {
+    return !(_.startsWith(d, '-K2'))
+  })
+
+  var groups = _.groupBy(filteredFeeds)
+  var lengths = _.mapValues(groups, function(d) {
+    return d.length
+  })
+  var pairs = _.pairs(lengths)
+  var filtered_pairs = _.filter(pairs, function(d) {
+    return (d[0] == 'gmail' || d[0] == 'twitter' || d[0] == 'github')
+  })
+  return filtered_pairs.join(', ')
 }
 
-function question4(events){
-  return '...'
+function what_is_the_most_popular_online_feed(events){
+  var userEvents = _.values(events)
+  var userFeeds = _.flatten(_.map(userEvents, function(d) {
+    return _.keys(d)
+  }))
+  filteredFeeds = _.filter(userFeeds, function(d) {
+    return !(_.startsWith(d, '-K2'))
+  })
+
+  var groups = _.groupBy(filteredFeeds)
+  var lengths = _.mapValues(groups, function(d) {
+    return d.length
+  })
+  var pairs = _.pairs(lengths)
+  var sorted_pairs = _.sortBy(pairs, function(d) {
+    return -d[1]
+  })
+
+  return _.first(sorted_pairs) + ' of ' + _.keys(events).length + ' users.'
 }
 
-function question5(events){
-  return '...'
+function what_is_the_max_number_of_feeds_for_a_user(events){
+  var userEvents = _.values(events)
+  var feedSize = _.mapValues(userEvents, function(d) {
+    return _.size(d)
+  })
+  return _.max(_.values(feedSize))
 }
 
-function question6(events){
-  return '...'
+function what_is_the_min_number_of_feeds_for_a_user(events){
+  var userEvents = _.values(events)
+  var feedSize = _.mapValues(userEvents, function(d) {
+    return _.size(d)
+  })
+  return _.min(_.values(feedSize))
 }
 
-function question7(events){
-  return '...'
+function what_is_max_event_count_for_a_user_feed(events){
+  var userEvents = _.values(events)
+  var max_count = 0
+  var userFeeds = _.flatten(_.map(userEvents, function(d) {
+    var x = _.map(d, function(f) {
+      // console.log('name: ' + _.keys(d) + ', count: ' + _.size(f))
+      var count = _.size(f)
+      if (count > max_count) { max_count = count }
+    })
+  }))
+  return max_count
 }
 
-function question8(events){
-  return '...'
+function what_is_average_event_count_for_a_user_feed(events){
+  var userEvents = _.values(events)
+  var filtered_userEvents = _.filter(userEvents, function(d) {
+    return _.isObject(d)
+  })
+  var event_count = 0
+  var number_feeds = 0
+  var userFeeds = _.flatten(_.map(filtered_userEvents, function(d) {
+    var x = _.map(d, function(f) {
+      var count = _.size(f)
+      event_count += count
+      number_feeds++
+    })
+  }))
+  return _.round(event_count/number_feeds, 0) 
 }
 
-function question9(events){
-  return '...'
-}
-
-function question10(events){
-  return '...'
+function what_is_min_event_count_for_a_user_feed(events){
+  var userEvents = _.values(events)
+  var min_count = -1
+  var userFeeds = _.flatten(_.map(userEvents, function(d) {
+    var x = _.map(d, function(f) {
+      // console.log('name: ' + _.keys(d) + ', count: ' + _.size(f))
+      var count = _.size(f)
+      if (min_count < 0 || count < min_count) { min_count = count }
+    })
+  }))
+  return min_count
 }
 
 

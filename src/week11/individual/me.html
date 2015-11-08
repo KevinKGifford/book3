@@ -121,7 +121,8 @@ function how_many_emails_have_i_received_since(events) {
 
 function how_many_emails_from_NASA(events) {
   var nasa = _.filter(array, function(d) {
-    return ( _.includes(d.email_sender, 'NASA') || _.includes(d.email_sender, 'IAF') )
+    return ( _.includes(d.email_sender, 'NASA') || _.includes(d.email_sender, 'IAF') || 
+             _.includes(d.email_subject, 'NASA') )
   }).length
   emails_classified += nasa
   return 'I received ' + nasa + ' emails from NASA related entities.'
