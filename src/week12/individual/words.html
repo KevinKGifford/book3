@@ -333,36 +333,23 @@ function func8() {
   var filteredOilData = _.filter(items, function(d) {
     return d.word == 'oil'
   })
-  var groupsOil = _.groupBy(filteredOilData, 'decade')
   var filteredGoldData = _.filter(items, function(d) {
     return d.word == 'gold'
   })
-  var groupsGold = _.groupBy(filteredGoldData, 'decade')
-  console.log('filteredOilData', filteredOilData)
-  console.log('filteredGoldData', filteredGoldData)
 
-  var resultsOil =  _.mapValues(groupsOil, function(d) {
-    return _.flatten(_.pluck(d, 'rank'))
+  oilDecades = _.map(filteredOilData, function(d) {
+    return _.pick(d, 'decade', 'rank')
   })
-  var resultsGold =  _.mapValues(groupsGold, function(d) {
-    return _.flatten(_.pluck(d, 'rank'))
+  goldDecades = _.map(filteredGoldData, function(d) {
+    return _.pick(d, 'decade', 'rank')
   })
-  console.log('resultsOil', resultsOil)
-  console.log('resultsGold', resultsGold)
 
   // Compare elements of both objects and find decade
-  console.log('here I am')
-  // var decade = _.map(_.zip(resultsOil, resultsGold), function(d) {
-  var decade = _.map(_.zip(resultsOil, resultsGold), function(d) {
-    console.log('hello...', d)
-    console.log('resultsOil', parseInt(d[0]))
-    console.log('resultsGold', parseInt(d[1]))
-    return parseInt(d[0]) > parseInt(d[1])
+  var decade = _.map(_.zip(oilDecades, goldDecades), function(d) {
+    if (parseInt(d[0].rank) < parseInt(d[1].rank)) { return parseInt(d[0].decade) }
   })
-  // })[0].decade
-  console.log('decade', decade)
 
-  return decade
+  return _.min(decade) + 's'
 }
 
 function func9() {
