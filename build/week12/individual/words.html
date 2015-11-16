@@ -166,6 +166,7 @@ function func2() {
     return d.word == 'oil'
   })
   var groups = _.groupBy(filteredData, 'decade')
+
   var results =  _.mapValues(groups, function(d) {
     return _.flatten(_.pluck(d, 'rank'))
   })
