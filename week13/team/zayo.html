@@ -1,0 +1,318 @@
+<html>
+<head>
+    <style>
+        .answer {
+            min-height: 50px
+        }
+        section{
+          padding: 10px;
+          margin-bottom: 12px
+        }
+        .parallax-container {
+          height: 300
+        }
+        .popup {
+            width: 500;
+            height: 500;
+        }
+        #title {
+          position: absolute;
+          padding: 20px;
+          font-size: 64px;
+          font-weight: bolder;
+          color: white;
+          top: 100px;
+          left: 0px;
+          text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black
+        }
+        #title .authors {
+          padding: 20px;
+          font-size: 32px;
+          font-weight: bolder;
+          color: #BBB;
+          text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black
+        }
+        #map { height: 1000px; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/css/materialize.min.css">
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.9.4/chartist.min.css">
+</head>
+<body>
+
+  <div class="parallax-container">
+    <div class="parallax">
+      <img src="zayo-numbers.png">
+    </div>
+  </div>
+
+  <div class="section white container flow-text">
+
+      <div id="questions" class="collection with-header">
+          <div class="collection-header">Questions</div>
+          <section id="q1" class="question collection-item">
+              <h4>Q1: What is the (1) number of accounts; and (2) combined MRR for each Zayo customer?</h4>
+              <div class="answer"></div>
+          </section>
+          <section id="q2" class="question collection-item">
+              <h4>Q2: What is the average total spending per industry?</h4>
+              <div class="answer"></div>
+          </section>
+          <section id="q3" class="question collection-item">
+              <h4>Q3: Which product does each industry prefer?</h4>
+              <div class="answer"></div>
+          </section>
+          <section id="q4" class="question collection-item">
+              <h4>Q4: Which State A has the highest average revenue?</h4>
+              <div class="answer"></div>
+          </section>
+          <section id="q5" class="question collection-item">
+              <h4>Q5: Which State Z has the highest average revenue?</h4>
+              <div class="answer"></div>
+          </section>
+          <section id="q6" class="question collection-item">
+              <h4>Q6: Which product pushes the highest average revenue?</h4>
+              <div class="answer"></div>
+          </section>
+          <section id="q7" class="question collection-item">
+              <h4>Q7: What term periods have the highest average monthly revenue?</h4>
+              <div class="answer"></div>
+          </section>
+  </div>
+
+  <div class="parallax-container" style="height:200px">
+    <div class="parallax">
+      <img src="zayo-numbers.png">
+    </div>
+  </div>
+
+
+  <div class="section white container flow-text">
+    <div class="markdown">
+
+# Discussion
+
+    </div>
+  </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.5/marked.min.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
+    <script src="http://bigdatahci2015.github.io/data/js/geolib.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.9.4/chartist.min.js"></script>
+    <script>
+
+// Global scope (i.e., can be accessed in javascript console)
+var service_items
+var profile_items
+
+// Process data functions
+
+function solution1() {
+  // What is the (1) number of accounts; and (2) combined MRR for each Zayo customer?
+  var groups = _.groupBy(service_items, 'ID/Name')
+  var lengths = _.mapValues(groups, function(d) {
+    return d.length
+  })
+  var pairs = _.pairs(lengths)
+  var sorted_output = _.sortBy(pairs, function(d) {
+    return -d[1]
+  })
+
+  var mrrSum = _.mapValues(groups, function(d) {
+    return _.round(_.sum(_.pluck(d, 'Total MRR')), 0)
+  })
+  var pairs = _.pairs(mrrSum)
+  var sorted_mrrSum = _.sortBy(pairs, function(d) {
+    return -d[1]
+  })
+
+  return '<br><b>Customer ID accounts:</b> ' + sorted_output.join('; ') + 
+         '<br><br><b> Customer ID MRR: </b>' + sorted_mrrSum.join('; ')
+}
+
+function solution2() {
+  // What is the average total spending per industry?
+  var groups = _.groupBy(profile_items, 'Industry')
+  groups = _.mapValues(groups, function(d){
+      var avg = _.round(_.sum(_.pluck(d, 'Total (BRR)'))/d.length, 0)
+      return avg
+  })
+  var pairs = _.pairs(groups)
+  pairs = _.sortBy(pairs, function(d){
+    return d[1]
+  }).reverse()
+
+  var str = ""
+  for(i = 0; i < pairs.length; i++) {
+    str += pairs[i][0] + ": " + pairs[i][1] + "<br />"
+  }
+  return str
+}
+
+function solution3() {
+  // Which product does each industry prefer?
+  var groups = _.groupBy(profile_items, 'Industry')
+
+  groups = _.mapValues(groups, function(d){
+    var ATotal = 0
+    var BTotal = 0
+    var CTotal = 0
+    var DTotal = 0
+
+  _.forEach(d, function(f) {
+      if(f['Product A Total BRR'] != '0'){
+        ATotal++
+      }
+      if(f['Product B Total BRR'] != '0'){
+        BTotal++
+      }
+      if(f['Product C Total BRR'] != '0'){
+        CTotal++
+      }
+      if(f['Product D Total BRR'] != '0'){
+        DTotal++
+      }
+    })
+
+    if ((ATotal > BTotal) && (ATotal > CTotal) && (ATotal > DTotal)){
+      return ' A'
+    }
+    if ((BTotal > ATotal) && (BTotal > CTotal) && (BTotal > DTotal)){
+      return ' B'
+    }
+    if ((CTotal > ATotal) && (CTotal > BTotal) && (CTotal > DTotal)){
+      return ' C'
+      }
+    if ((DTotal > ATotal) && (DTotal > BTotal) && (DTotal > CTotal)){
+      return ' D'
+    }
+    else {
+      return ' Other'
+    }
+  })
+
+  return _.pairs(groups).join("<br />")
+}
+
+function solution4() {
+  // Which State A has the highest average revenue?
+  var groups = _.groupBy(service_items, 'State A')
+  groups = _.mapValues(groups, function(d){
+    var avg = _.sum(_.pluck(d, 'Total MRR')) / d.length
+    return _.round(avg, 0)
+  })
+  var pairs = _.pairs(groups)
+  pairs = _.sortBy(pairs, function(d){
+    return d[1]
+  }).reverse()
+  return _.take(pairs, 10).join("<br />")
+}
+
+function solution5() {
+  // Which State Z has the highest average revenue?
+  var groups = _.groupBy(service_items, 'State Z')
+  groups = _.mapValues(groups, function(d){
+    var avg = _.sum(_.pluck(d, 'Total MRR')) / d.length
+    return _.round(avg, 0)
+  })
+  var pairs = _.pairs(groups)
+  pairs = _.sortBy(pairs, function(d){
+    return d[1]
+  }).reverse()
+  return _.take(pairs, 10).join("<br />")
+}
+
+function solution6() {
+  // Which product pushes the highest average revenue?
+  var groups = _.groupBy(service_items, 'Product')
+  groups = _.mapValues(groups, function(d){
+    var avg = _.sum(_.pluck(d, 'Total MRR'))/d.length
+    return _.round(avg, 2)
+  })
+  var pairs = _.pairs(groups)
+  pairs = _.sortBy(pairs, function(d){
+    return d[1]
+  }).reverse()
+  return pairs.join('<br />')
+}
+
+function solution7() {
+  // What term periods have the highest average monthly revenue?
+  var data = _.chain(service_items).groupBy(function(service){
+    return Math.round(service['Term']/10)*10;
+  }).mapValues(function(group){
+      return _.sum(group, 'Total MRR')/group.length;
+  }).value();
+
+  return new Chartist.Bar('#q7 .answer', {
+    labels : _.keys(data),
+    series : [_.values(data)]
+  })
+}
+
+
+function run(id, solutionFunc, data){
+    console.log('run solution for ' + id)
+    var answer = solutionFunc(data)
+    $(id).find('.answer').html(answer)
+}
+
+function loadDataThenRunSolutions() {
+
+  $.get('services.json')
+  // $.get('tranzact_services.json')
+    .done(function(data) {
+
+       service_items = data
+       console.log('number of service_items loaded:', service_items.length)
+       console.log('first service_item', service_items[0])
+
+       run('#q1', solution1, service_items)
+       run('#q4', solution4, service_items)
+       run('#q5', solution5, service_items)
+       run('#q6', solution6, service_items)
+       run('#q7', solution7, service_items)
+    })
+    .fail(function(err){
+        console.error(err)
+  })
+
+  $.get('profiles.json')
+  // $.get('tranzact_profiles.json')
+    .done(function(data) {
+
+       profile_items = data
+       console.log('number of profile_items loaded:', profile_items.length)
+       console.log('first profile_item', profile_items[0])
+
+       run('#q2', solution2, profile_items)
+       run('#q3', solution3, profile_items)
+    })
+    .fail(function(err){
+        console.error(err)
+  })
+
+}
+
+loadDataThenRunSolutions()
+
+// convert Markdown to html
+$('.markdown').each(function(){
+  var markdownText = $(this).text()
+  $(this).html(marked(markdownText))
+})
+
+// initialize the parallax effect
+$(document).ready(function(){
+  console.log($('.parallax').html())
+    $('.parallax').parallax()
+})
+
+    </script>
+
+</body>
+</html>
