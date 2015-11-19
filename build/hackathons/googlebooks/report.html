@@ -39,7 +39,7 @@
     <div class="parallax">
       <img src="http://res.cloudinary.com/craftml/image/upload/c_scale,e_brightness:-62,w_1000/v1447038536/books_nh4k05.jpg">
       <h1 id="title">How did word usage change over time?
-        <div class="authors">by [Name 1], [Name 2], [Name 3], [Name 4]</div>
+        <div class="authors">by [Caleb Hsu], [Parker Illig], [Satchel Spencer], [KevinKGifford]</div>
       </h1>
     </div>
   </div>
@@ -52,7 +52,6 @@
           <span class="lever"></span>
         </label>
       </div>
-
       <div id="questions" class="col s10 collection">
       </div>
   </div>
@@ -120,11 +119,10 @@ function ask(text, func){
 }
 
 function analyze(){
-  ask('question1?', func1)
-  ask('question2?', func2)
-  ask('question3?', func3)
-  ask('question4?', func4)
-  ask('question5?', func5)
+  ask('How does the usage of countries frequently related to China politically (and geographically) differ between Chinese and English literature (Caleb Hsu)?', func1)
+  ask('How does the usage of major enemy and ally countries of the U.S. change throughout time in American literature (Parker Illig)?', func2)
+  ask('(Satchel Spencer)?', func3)
+  ask('How does the usage frequency of selected scientists and engineers change over time (Albert Einstein, Vint Cerf, Claude Shannon, Thomas Edison, Nicolai Tesla) (Kevin Gifford)?', func4)
 
   $('pre code').each(function(i, block) {
     hljs.highlightBlock(block);
@@ -132,25 +130,58 @@ function analyze(){
   toggleSourecode()
 }
 
-function func1(){
-  return '...'
+function func1() {
+  return '<img src="/hackathons/googlebooks/chinese.png" />' + '<img src="/hackathons/googlebooks/english.png" />'
 }
 
 function func2(){
-  return '...'
+  return '<img src="/hackathons/googlebooks/americanalliesandenemies.png" />'
 }
 
 function func3(){
-  return '...'
+  function levenshtein(a, b) {
+    if (!a.length) return b.length
+    if (!b.length) return a.length
+    var matrix = []
+    for (i = 0; i <= b.length; i++) matrix[i] = i
+    for (j = 0; j <= a.length; j++) matrix[0][j] = j
+    for (i = 1; i <= b.length; i++) {
+      for (j = 1; j <= a.length; j++) {
+        if (b.charAt(i-1) == a.charAt(j-1)) matrix[i][j] = matrix[i-1][j-1]
+        else matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, Math.min(matrix[i][j-1] + 1, matrix[i-1][j] + 1))
+      }
+    }
+    return matrix[b.length][a.length]
+  }
+
+  var newi = _.chain(items).filter(function(i) {
+    return i.decade == '2000' && i.word.length > 5
+  }).pluck('word').uniq().value()
+
+  var old = _.chain(items).filter(function(i) {
+    return parseInt(i.decade) == 1900 && i.word.length > 5
+  }).pluck('word').uniq().value()
+
+  var newer = _.difference(newi, old)
+  var older = _.difference(old, newi)
+
+  var occ = _.chain(older).object().mapValues(function(u, oldWord) {
+    return _.chain(newer).filter(function(newWord) {
+      return levenshtein(oldWord, newWord) < 2
+    }).take(5).value();
+  }).pairs().filter(function(p) {
+    return p[1].length
+  }).map(function(p) {
+    return p[0]+' -> '+p[1][0]
+  }).value().join('<br>')
+
+  return occ  
 }
 
 function func4(){
-  return '...'
+  return '<img src="/hackathons/googlebooks/scientific-luminaries.png" />'
 }
 
-function func5(){
-  return '...'
-}
 
 // initialize the parallax effect
 $(document).ready(function(){

@@ -6,9 +6,7 @@ layout: layout.hbs
 
 # Team
 
-- [Zayo - Part II](TBA)
-
-- Zayo - Part II Report: [zayo.html](zayo.html)
+- Zayo - Part II Report: [zayo.html](team/zayo.html)
 
 # Individual
 
