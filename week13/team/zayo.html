@@ -49,7 +49,7 @@
   <div class="section white container flow-text">
 
       <div id="questions" class="collection with-header">
-          <div class="collection-header">Questions</div>
+          <div class="collection-header">Week 13 Questions (tranzact data set)</div>
           <section id="q1" class="question collection-item">
               <h4>Q1: What is the (1) number of accounts; and (2) combined MRR for each Zayo customer?</h4>
               <div class="answer"></div>
@@ -106,14 +106,17 @@
     <script>
 
 // Global scope (i.e., can be accessed in javascript console)
-var service_items
-var profile_items
+var tranzact_service_items
+var tranzact_profile_items
 
 // Process data functions
 
 function solution1() {
   // What is the (1) number of accounts; and (2) combined MRR for each Zayo customer?
-  var groups = _.groupBy(service_items, 'ID/Name')
+  var filtered_data = _.filter(tranzact_service_items, function(d) {
+    return d['Name/ID'] != ""
+  })
+  var groups = _.groupBy(filtered_data, 'Name/ID')
   var lengths = _.mapValues(groups, function(d) {
     return d.length
   })
@@ -136,11 +139,23 @@ function solution1() {
 
 function solution2() {
   // What is the average total spending per industry?
-  var groups = _.groupBy(profile_items, 'Industry')
+  // Filter out entries (11) with "Industry": "" which all have a "BRR": "0.00"
+  var filtered_data = _.filter(tranzact_profile_items, function(d) {
+    return d['Industry'] != ""
+  })
+  var groups = _.groupBy(filtered_data, 'Industry')
+  console.log('groups', groups)
   groups = _.mapValues(groups, function(d){
-      var avg = _.round(_.sum(_.pluck(d, 'Total (BRR)'))/d.length, 0)
+      // Need to parseInt here I think...
+      // console.log('_.pluck(d, Total BRR): ', _.pluck(d, 'Total BRR'))
+      // console.log('_.parseInt(_.pluck(d, Total BRR)): ', _.parseInt(_.pluck(d, 'Total BRR')))
+      // var array = _.map(_.pluck(d, 'Total BRR'), _.parseInt)
+      // console.log('array: ', array)
+      // console.log('d.length: ', d.length)
+      var avg = _.round(_.sum(_.pluck(d, 'Total BRR'))/d.length, 2)
       return avg
   })
+  console.log('groups', groups)
   var pairs = _.pairs(groups)
   pairs = _.sortBy(pairs, function(d){
     return d[1]
@@ -155,52 +170,13 @@ function solution2() {
 
 function solution3() {
   // Which product does each industry prefer?
-  var groups = _.groupBy(profile_items, 'Industry')
-
-  groups = _.mapValues(groups, function(d){
-    var ATotal = 0
-    var BTotal = 0
-    var CTotal = 0
-    var DTotal = 0
-
-  _.forEach(d, function(f) {
-      if(f['Product A Total BRR'] != '0'){
-        ATotal++
-      }
-      if(f['Product B Total BRR'] != '0'){
-        BTotal++
-      }
-      if(f['Product C Total BRR'] != '0'){
-        CTotal++
-      }
-      if(f['Product D Total BRR'] != '0'){
-        DTotal++
-      }
-    })
-
-    if ((ATotal > BTotal) && (ATotal > CTotal) && (ATotal > DTotal)){
-      return ' A'
-    }
-    if ((BTotal > ATotal) && (BTotal > CTotal) && (BTotal > DTotal)){
-      return ' B'
-    }
-    if ((CTotal > ATotal) && (CTotal > BTotal) && (CTotal > DTotal)){
-      return ' C'
-      }
-    if ((DTotal > ATotal) && (DTotal > BTotal) && (DTotal > CTotal)){
-      return ' D'
-    }
-    else {
-      return ' Other'
-    }
-  })
-
-  return _.pairs(groups).join("<br />")
+  // No Product BRR in the tranzact_profiles data set
+  return 'No Product BRR in the tranzact_profiles data set...'
 }
 
 function solution4() {
   // Which State A has the highest average revenue?
-  var groups = _.groupBy(service_items, 'State A')
+  var groups = _.groupBy(tranzact_service_items, 'State A')
   groups = _.mapValues(groups, function(d){
     var avg = _.sum(_.pluck(d, 'Total MRR')) / d.length
     return _.round(avg, 0)
@@ -214,7 +190,7 @@ function solution4() {
 
 function solution5() {
   // Which State Z has the highest average revenue?
-  var groups = _.groupBy(service_items, 'State Z')
+  var groups = _.groupBy(tranzact_service_items, 'State Z')
   groups = _.mapValues(groups, function(d){
     var avg = _.sum(_.pluck(d, 'Total MRR')) / d.length
     return _.round(avg, 0)
@@ -228,7 +204,10 @@ function solution5() {
 
 function solution6() {
   // Which product pushes the highest average revenue?
-  var groups = _.groupBy(service_items, 'Product')
+  var filtered_data = _.filter(tranzact_service_items, function(d) {
+    return d['Product'] != ""
+  })
+  var groups = _.groupBy(filtered_data, 'Product')
   groups = _.mapValues(groups, function(d){
     var avg = _.sum(_.pluck(d, 'Total MRR'))/d.length
     return _.round(avg, 2)
@@ -242,7 +221,7 @@ function solution6() {
 
 function solution7() {
   // What term periods have the highest average monthly revenue?
-  var data = _.chain(service_items).groupBy(function(service){
+  var data = _.chain(tranzact_service_items).groupBy(function(service){
     return Math.round(service['Term']/10)*10;
   }).mapValues(function(group){
       return _.sum(group, 'Total MRR')/group.length;
@@ -263,34 +242,32 @@ function run(id, solutionFunc, data){
 
 function loadDataThenRunSolutions() {
 
-  $.get('services.json')
-  // $.get('tranzact_services.json')
+  $.get('tranzact_services.json')
     .done(function(data) {
 
-       service_items = data
-       console.log('number of service_items loaded:', service_items.length)
-       console.log('first service_item', service_items[0])
+       tranzact_service_items = data
+       console.log('number of tranzact_service_items loaded:', tranzact_service_items.length)
+       console.log('first tranzact_service_item', tranzact_service_items[0])
 
-       run('#q1', solution1, service_items)
-       run('#q4', solution4, service_items)
-       run('#q5', solution5, service_items)
-       run('#q6', solution6, service_items)
-       run('#q7', solution7, service_items)
+       run('#q1', solution1, tranzact_service_items)
+       run('#q4', solution4, tranzact_service_items)
+       run('#q5', solution5, tranzact_service_items)
+       run('#q6', solution6, tranzact_service_items)
+       run('#q7', solution7, tranzact_service_items)
     })
     .fail(function(err){
         console.error(err)
   })
 
-  $.get('profiles.json')
-  // $.get('tranzact_profiles.json')
+  $.get('tranzact_profiles.json')
     .done(function(data) {
 
-       profile_items = data
-       console.log('number of profile_items loaded:', profile_items.length)
-       console.log('first profile_item', profile_items[0])
+       tranzact_profile_items = data
+       console.log('number of tranzact_profile_items loaded:', tranzact_profile_items.length)
+       console.log('first tranzact_profile_item', tranzact_profile_items[0])
 
-       run('#q2', solution2, profile_items)
-       run('#q3', solution3, profile_items)
+       run('#q2', solution2, tranzact_profile_items)
+       run('#q3', solution3, tranzact_profile_items)
     })
     .fail(function(err){
         console.error(err)
