@@ -264,7 +264,6 @@ function run(id, solutionFunc, data){
 function loadDataThenRunSolutions() {
 
   $.get('services.json')
-  // $.get('tranzact_services.json')
     .done(function(data) {
 
        service_items = data
@@ -282,7 +281,6 @@ function loadDataThenRunSolutions() {
   })
 
   $.get('profiles.json')
-  // $.get('tranzact_profiles.json')
     .done(function(data) {
 
        profile_items = data
