@@ -49,7 +49,7 @@
   <div class="section white container flow-text">
 
       <div id="questions" class="collection with-header">
-          <div class="collection-header">Week 13 Questions (tranzact data set)</div>
+          <div class="collection-header">Week 12 Questions (tranzact data set)</div>
           <section id="q1" class="question collection-item">
               <h4>Q1: What is the (1) number of accounts; and (2) combined MRR for each Zayo customer?</h4>
               <div class="answer"></div>
@@ -144,14 +144,8 @@ function solution2() {
     return d['Industry'] != ""
   })
   var groups = _.groupBy(filtered_data, 'Industry')
-  console.log('groups', groups)
+  // console.log('groups', groups)
   groups = _.mapValues(groups, function(d){
-      // Need to parseInt here I think...
-      // console.log('_.pluck(d, Total BRR): ', _.pluck(d, 'Total BRR'))
-      // console.log('_.parseInt(_.pluck(d, Total BRR)): ', _.parseInt(_.pluck(d, 'Total BRR')))
-      // var array = _.map(_.pluck(d, 'Total BRR'), _.parseInt)
-      // console.log('array: ', array)
-      // console.log('d.length: ', d.length)
       var avg = _.round(_.sum(_.pluck(d, 'Total BRR'))/d.length, 2)
       return avg
   })
