@@ -321,34 +321,62 @@ function solution4() {
 function solution5() {
   // Of the Tranzact accounts without services: How would you prioritize which 
   // accounts to go after first and which products would they potentially buy?
-//Strategy: Expected growth in dollars. Sales Volume * SalesTurnover.
+  // Strategy: Expected growth in dollars. Sales Volume * SalesTurnover. 
+  // Products are the most popular for a given industry
   
-  // completely stuck on mapping industries to products, too many products to make conditional checks and variables for.
-  
-  // var industries = _.groupBy(profileItems, 'Industry')
-  // var profilemap = _.mapValues(industries, function(d){
-  //   return _.pluck(d, 'Name/ID')
-  // })
-  // var products = _.groupBy(serviceItems, 'Product')
-  // var servicemap = _.mapValues(products, function(d){
-  //   return _.pluck(d, 'Name/ID')
-  // })
-  // console.log(products)
+  var industries = _.groupBy(profileItems, 'Industry')
+  var industriesmap = _.mapValues(industries, function(d){
+    return _.pluck(d, 'Name/ID')
+  })
+  var products = _.groupBy(serviceItems, 'Product')
+  var productsmap = _.mapValues(products, function(d){
+    return _.pluck(d, 'Name/ID')
+  })
+  var induspairs = _.pairs(industriesmap)
+  var prodpairs = _.pairs(productsmap)
+  var allmap = []
 
+  _.forEach(induspairs, function(d){
+    var maxproduct = ''
+    var maxcount = 0
+    for(var j = 0; j < d[1].length; j++){
+      _.forEach(prodpairs, function(f){
+         count = 0
+         for(var k = 0; k< f[1].length; k++){
+           if(d[1][j] == f[1][k]){
+             count++
+           }
+         }
+         if(count > maxcount){
+           maxcount = count
+           maxproduct = f[0]
+         }
+      })
+    }
+    allmap.push({'Industry': d[0], 'Product': maxproduct})
+  })
   var filtered = _.filter(noServiceItems, function(d){
     return !(d.SalesVolume == '#N/A')
   })
   var groups = _.groupBy(filtered, 'Name/ID')
-  console.log(groups)
   var map = _.mapValues(groups, function(d){
-    return parseInt(_.pluck(d, 'SalesVolume')) * parseInt(_.pluck(d, 'SalesTurnoverGrowthRate'))
+    var matchedproduct = 'No Matched Product'
+    _.forEach(allmap, function(f){
+      if(d[0].Industry == f.Industry){
+        matchedproduct = f.Product
+      }
+    })
+    return {'GrowthRate': parseInt(_.pluck(d, 'SalesVolume')) * parseInt(_.pluck(d, 'SalesTurnoverGrowthRate')), 'Product': matchedproduct}
   })
-  var sorted = _.sortBy(_.pairs(map), function(d){
-    return d[1]
-  }).reverse()
-  console.log(sorted)
-  var str = 'Ordered by Expected Growth in Dollars (Sales Volume * Sales Growth Rate): '
 
+  var sorted = _.sortBy(_.pairs(map), function(d){
+    return d[1].GrowthRate
+  }).reverse()
+  var str = 'Ordered by Expected Growth in Dollars (Sales Volume * Sales Growth Rate): '
+  _.forEach(sorted, function(d){
+    str += ('ID: ' + d[0] + ', Matched Product: ' + d[1].Product + '.....')
+  })
+  return str
 }
 
 
