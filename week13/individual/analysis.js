@@ -78,39 +78,78 @@ function example3() {
 }
 
 function func1() {
-  // How many unique non-zero, non-negative sample values in this dataset? what are they?
-  count = 0
-  return _.filter(items, function(d) {
-    if (count < 1 ) { console.log('d', d) }
-
+  // How many unique non-zero, non-negative sample values in this dataset? What are they?
+  var validSamples = []
+  var samples = _.map(items, function(d) {
     return _.map(d['Samples'], function(f) {
-      if (count < 1 ) { console.log('f', f) }
-
-      count++
-      return f > 0
-
+      if (f > 0) { validSamples[validSamples.length] = f }
     })
-  }).join(', ')
+  })
+  
+  var numberUniqueSamples = 'There are ' + _.uniq(validSamples).length + ' unique non-zero, non-negative sample values in the dataset; '
+  var validSampleValues = ' The valid sample values are: ' + _.uniq(validSamples).join(', ')
+
+  return numberUniqueSamples + validSampleValues
+
 }
 
 function func2() {
   // What is the average time (seconds) between two measurements?
-  return '...'
+  var timestamps = []
+  var findTimestamps = _.map(items, function(d) {
+    timestamps[timestamps.length] = d['Ping_time']
+  })
+  // console.log('timestamps', timestamps.join(', '))
+  var time1 = moment
 }
 
 function func3() {
   // At 09:57:18, how many samples in this measurement have the value 7?
-  return '...'
+  var timestamp = _.filter(items, function(d) {
+    return d['Ping_time'] == "09:57:18"
+  })
+  var sampleValue7 = _.filter(timestamp[0].Samples, function(d) {
+    return d == "7.000000"
+  })
+  return sampleValue7.length
 }
 
 function func4() {
   // Which measurement has the most number of samples with the value 3?
-  return '...'
+  var countArray = []
+  var sampleItems = _.map(items, function(d) {
+    count = 0
+    var sampleNumber3 = _.map(d['Samples'], function(f) {
+      if (f == "3.000000") { count++ }
+    })
+    countArray[countArray.length] = count
+  })
+  var max3s = _.max(countArray)
+  var index = _.findIndex(countArray, function(d) {
+    return d == max3s
+  })
+  var string = 'Measurement #313 (starting from 0) at Ping_time: ' + items[index].Ping_time + ' has ' + max3s + ' samples with the value 3'
+
+  return string
 }
 
 function func5() {
   // How many measurements have no sample value greater than zero?
-  return '...'
+  var countArray = []
+  var sampleItems = _.map(items, function(d) {
+    count = 0
+    var sampleNumber3 = _.map(d['Samples'], function(f) {
+      if (f <= "0.000000") { count++ }
+    })
+    countArray[countArray.length] = count
+  })
+  var max3s = _.max(countArray)
+  var index = _.findIndex(countArray, function(d) {
+    return d == max3s
+  })
+  var string = 'Measurement #313 (starting from 0) at Ping_time: ' + items[index].Ping_time + ' has ' + max3s + ' samples with the value 3'
+
+  return string
 }
 
 function func6() {
