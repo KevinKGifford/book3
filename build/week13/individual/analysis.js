@@ -128,33 +128,35 @@ function func4() {
   var index = _.findIndex(countArray, function(d) {
     return d == max3s
   })
-  var string = 'Measurement #313 (starting from 0) at Ping_time: ' + items[index].Ping_time + ' has ' + max3s + ' samples with the value 3'
+  var string = 'Measurement #314 (starting from 1) at Ping_time: ' + items[index].Ping_time + ' has ' + max3s + ' samples with the value 3'
 
   return string
 }
 
 function func5() {
   // How many measurements have no sample value greater than zero?
-  var countArray = []
-  var sampleItems = _.map(items, function(d) {
-    count = 0
-    var sampleNumber3 = _.map(d['Samples'], function(f) {
-      if (f <= "0.000000") { count++ }
-    })
-    countArray[countArray.length] = count
-  })
-  var max3s = _.max(countArray)
-  var index = _.findIndex(countArray, function(d) {
-    return d == max3s
-  })
-  var string = 'Measurement #313 (starting from 0) at Ping_time: ' + items[index].Ping_time + ' has ' + max3s + ' samples with the value 3'
-
-  return string
+  return _.filter(items, function(d) { 
+    return _.max(d['Samples']) <= 0
+  }).length
 }
 
 function func6() {
   // Which valid (i.e., greater than zero) sample value is the most common?
-  return '...'
+  valueArray = []
+  var samples = _.map(items, function(d) { 
+    var filterData = _.map(d['Samples'], function(f) {
+      if (f > 0) { valueArray[valueArray.length] = f }
+    })
+  })
+  var groups = _.groupBy(valueArray)
+  var values = _.mapValues(groups, function(d) {
+    return d.length
+  })
+  var pairs = _.pairs(values)
+  var sortedData = _.sortBy(pairs, function(d) {
+    return -d[1]
+  })
+  return 'The most common sample value is ' + sortedData[0][0] + ' which occured ' + sortedData[0][1] + ' times.'
 }
 
 function func7() {
