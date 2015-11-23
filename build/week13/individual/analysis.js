@@ -59,45 +59,68 @@ function analyze(){
   toggleSourecode()
 }
 
-function example1(){
+function example1() {
+  // How many measurements were included in this dataset?
   return items.length
 }
 
-function example2(){
+function example2() {
+  // How many samples does each measurement contain?
   return items[0].Samples.length
 }
 
-function example3(){
-  return _.filter(items[9].Samples, function(d){
+function example3() {
+  // At the 10-th measurement, what are valid sample values (> 0)?
+  // A sample value is valid if it is greater than zero
+  return _.filter(items[9].Samples, function(d) {
     return d > 0
   }).join(', ')
 }
 
-function func1(){
+function func1() {
+  // How many unique non-zero, non-negative sample values in this dataset? what are they?
+  count = 0
+  return _.filter(items, function(d) {
+    if (count < 1 ) { console.log('d', d) }
+
+    return _.map(d['Samples'], function(f) {
+      if (count < 1 ) { console.log('f', f) }
+
+      count++
+      return f > 0
+
+    })
+  }).join(', ')
+}
+
+function func2() {
+  // What is the average time (seconds) between two measurements?
   return '...'
 }
 
-function func2(){
+function func3() {
+  // At 09:57:18, how many samples in this measurement have the value 7?
   return '...'
 }
 
-function func3(){
+function func4() {
+  // Which measurement has the most number of samples with the value 3?
   return '...'
 }
 
-function func4(){
+function func5() {
+  // How many measurements have no sample value greater than zero?
   return '...'
 }
 
-function func5(){
+function func6() {
+  // Which valid (i.e., greater than zero) sample value is the most common?
   return '...'
 }
 
-function func6(){
-  return '...'
-}
-
-function func7(){
+function func7() {
+  // When was the boat furthest away from NYC (40.7127 N, 74.0059 W)? what was the distance?'
+  // use Leaflet to draw a line between NYC and this "furtherest away" location
 
   // this sample code shows how to display a map and put a marker to visualize
   // the location of the first item (i.e., measurement data)
@@ -117,22 +140,35 @@ function func7(){
   return '...'
 }
 
-function func8(){
+function func8() {
+  // What was the path of the boat?'
+  // use Leaflet to draw a line between every two locations
   return '...'
 }
 
-function func9(){
+function func9() {
+  // Where were the most common sample value measured?'
+  // say, your answer to Question Six is 13, draw a marker for each measurement that has
+  // at least one sample whose value is 13
   return '...'
 }
 
-function func10(){
+function func10() {
+  // How does the desensity of valid sample values change across the geographical area?'
+  // use the brightness to indicate high number of valid sample values each
+  // for each measurement, draw a marker,
+  // use the brightness to represent the number of valid samples
+  // the brighter a spot, the higher the number
+  // for those measurements without a valid sample, draw nothing
   return '...'
 }
 
-function func11(){
+function func11() {
+  // What is the distribution of fish?
   return '...'
 }
 
-function func12(){
+function func12() {
+  // What is the distribution of  are schools of zooplankton?
   return '...'
 }

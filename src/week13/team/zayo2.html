@@ -214,6 +214,15 @@ function solution1() {
   var noServiceGroups = _.groupBy(noServiceItems, 'Name/ID')
   // console.log('noServiceGroups', noServiceGroups)
 
+  // Caleb's Text Analysis - Q1
+  // since some industry names have /, which causes confusion between the industry and product
+  if ((_.first(sortedPairs)[0].split("/")).length == 3)
+    var industryName = _.first(sortedPairs)[0].split("/")[0] + ' / ' + _.first(sortedPairs)[0].split("/")[1]
+  else 
+    var industryName = _.first(sortedPairs)[0].split("/")[0]
+
+  return 'According to our analysis, the industry that currently spends the most is the <b>' +  industryName + '</b> industry on <b>' + _.last(_.first(sortedPairs)[0].split("/")) + '</b>.'
+
 }
 
 function solution2() {
@@ -239,6 +248,10 @@ function solution2() {
     series: [ _.take(chartSeries, 8) ]
   }
   new Chartist.Bar('#q2 .answer', data);
+
+  // Caleb's Text Analysis - Q2
+  return 'After looking at products with the highest average Total MRR, we recommend that Zayo prioritize <b>' + _.first(sortedPairs)[0] + '</b>, which has an average Total MRR of $' + _.first(sortedPairs)[1].toLocaleString() + ', and <b>' + sortedPairs[1][0] + '</b>, which has an average Total MRR of $' + sortedPairs[1][1].toLocaleString() + '.'
+
 }
 
 function solution3() {
@@ -267,17 +280,76 @@ function solution3() {
   }
   new Chartist.Bar('#q3 .answer', data);
 
+  // Caleb's Text Analysis - Q3
+  return 'After looking at states with the highest total Total MRR, we recommend that Zayo prioritize <b>' + _.first(sortedPairs)[0] + '</b>, which has a total MRR of $' + _.first(sortedPairs)[1].toLocaleString() + ', and <b>' + sortedPairs[1][0]+ '</b>, which has a total MRR of $' + sortedPairs[1][1].toLocaleString() + '.'
+
 }
 
 function solution4() {
   // If Zayo sent quotes to all Tranzact accounts, how would you prioritize the customer account list?
+  // Strategy: Highest Sales volume for no service, and lowest sales volume for serviced
+
+  var filtered = _.filter(noServiceItems, function(d){
+    return !(d.SalesVolume == '#N/A')
+  })
+  var groups = _.groupBy(filtered, 'Name/ID')
+  console.log(groups)
+  var map = _.mapValues(groups, function(d){
+    return parseInt(_.pluck(d, 'SalesVolume'))
+  })
+  var sorted = _.sortBy(_.pairs(map), function(d){
+    return d[1]
+  }).reverse()
+  var str = 'No Services Accounts First (Ordered Most to Least by Sales Volume): '
+  _.forEach(sorted, function(d){
+    str += (d[0] + ', ')
+  })
+  var groups2 = _.groupBy(serviceItems, 'Name/ID')
+  var map2 = _.mapValues(groups2, function(d){
+    return _.sum(_.map(_.pluck(d, 'Total MRR'), _.parseInt))
+  })
+  var sorted2 = _.sortBy(_.pairs(map2), function(d){
+    return d[1]
+  })
+  str += '; Then Accounts Already With Services (Ordered Least to Most by MRR): '
+  _.forEach(sorted2, function(d){
+    str += (d[0] + ', ')
+  })
+  return str
 }
 
 function solution5() {
   // Of the Tranzact accounts without services: How would you prioritize which 
   // accounts to go after first and which products would they potentially buy?
-}
+//Strategy: Expected growth in dollars. Sales Volume * SalesTurnover.
+  
+  // completely stuck on mapping industries to products, too many products to make conditional checks and variables for.
+  
+  // var industries = _.groupBy(profileItems, 'Industry')
+  // var profilemap = _.mapValues(industries, function(d){
+  //   return _.pluck(d, 'Name/ID')
+  // })
+  // var products = _.groupBy(serviceItems, 'Product')
+  // var servicemap = _.mapValues(products, function(d){
+  //   return _.pluck(d, 'Name/ID')
+  // })
+  // console.log(products)
 
+  var filtered = _.filter(noServiceItems, function(d){
+    return !(d.SalesVolume == '#N/A')
+  })
+  var groups = _.groupBy(filtered, 'Name/ID')
+  console.log(groups)
+  var map = _.mapValues(groups, function(d){
+    return parseInt(_.pluck(d, 'SalesVolume')) * parseInt(_.pluck(d, 'SalesTurnoverGrowthRate'))
+  })
+  var sorted = _.sortBy(_.pairs(map), function(d){
+    return d[1]
+  }).reverse()
+  console.log(sorted)
+  var str = 'Ordered by Expected Growth in Dollars (Sales Volume * Sales Growth Rate): '
+
+}
 
 
 function run(id, solutionFunc, data) {
