@@ -39,7 +39,7 @@ function analyze(){
   // say, your answer to Question Six is 13, draw a marker for each measurement that has
   // at least one sample whose value is 13
 
-  ask('how does the desensity of valid sample values change across the geographical area?', func10)
+  ask('how does the density of valid sample values change across the geographical area?', func10)
   // use the brightness to indicate high number of valid sample values each
   // for each measurement, draw a marker,
   // use the brightness to represent the number of valid samples
@@ -167,9 +167,27 @@ function func7() {
   // the location of the first item (i.e., measurement data)
   // you need to adapt this code to answer the question
 
-  var first = items[0]
-  var pos = [first.Latitude, first.Longitude]
-  var el = $(this).find('.viz')[0]    // lookup the element that will hold the map
+  // Get sample index of location furthest away from NYC, print distance from
+  // NYC and the sample time, and draw a line from NYC to this furthest point
+
+  var NYCCordinates = { latitude: 40.7127, longitude: -74.0059 }  // NYC
+
+  var distances = _.map(items, function(d) {
+    var boatCoordinates = { latitude: d.Latitude, longitude: d.Longitude }
+    return geolib.getDistance(NYCCordinates, boatCoordinates)/1000
+  })
+
+  var maxDistance = _.max(distances)
+  var index = _.findIndex(distances, function(d) {
+    return d == maxDistance
+  })
+  var answer = 'The maximum boat distance from NYC during the tranverse is ' + maxDistance + ' km. at: ' + items[index].Ping_time
+
+  var location = items[index]
+  var pos = [location.Latitude, location.Longitude]
+  var posFloat = [parseFloat(location.Latitude), parseFloat(location.Longitude)]
+
+  var el = $(this).find('.viz')[index]    // lookup the element that will hold the map
   $(el).height(500) // set the map to the desired height
   var map = createMap(el, pos, 5)
 
@@ -178,30 +196,122 @@ function func7() {
       fillColor: '#f03',
       fillOpacity: 0.5
   }).addTo(map);
-  return '...'
+
+  // Draw a line connecting between NYC and point of farthest departure
+  var latlngs = [ [40.7127, -74.0059], posFloat]
+  var polyline = L.polyline(latlngs, {color: 'green'}).addTo(map);
+
+  return answer
 }
 
 function func8() {
   // What was the path of the boat?'
   // use Leaflet to draw a line between every two locations
+
+  var location = items[0]
+  var pos = [location.Latitude, location.Longitude]
+  var el = $(this).find('.viz')[0]    // lookup the element that will hold the map
+  $(el).height(500) // set the map to the desired height
+  var map = createMap(el, pos, 5)
+
+  var circle = L.circle(pos, 500, {
+    color: 'red',
+    fillColor: '#f03',
+    fillOpacity: 0.5
+  }).addTo(map);
+
+  // Draw the boat traverse path
+  var ndx = 0
+  var vectors = _.map(items, function(d) {
+    if (ndx < items.length - 1) {
+      var location0 = items[ndx]
+      var location1 = items[ndx+1]
+      var latlng0 = [parseFloat(location0.Latitude), parseFloat(location0.Longitude)]
+      var latlng1 = [parseFloat(location1.Latitude), parseFloat(location1.Longitude)]
+      var latlngs = [latlng0, latlng1]
+      var polyline = L.polyline(latlngs, {color: 'green'}).addTo(map);
+      ndx++
+    }
+  })
+
   return '...'
 }
 
 function func9() {
   // Where were the most common sample value measured?'
-  // say, your answer to Question Six is 13, draw a marker for each measurement that has
-  // at least one sample whose value is 13
-  return '...'
+
+  var location = items[0]
+  var pos = [location.Latitude, location.Longitude]
+  var el = $(this).find('.viz')[0]    // lookup the element that will hold the map
+  $(el).height(500) // set the map to the desired height
+  var map = createMap(el, pos, 5)
+
+  // Find which sample value is the most common
+  valueArray = []
+  var samples = _.map(items, function(d) {
+    var filterData = _.map(d['Samples'], function(f) {
+      if (f > 0) { valueArray[valueArray.length] = f }
+    })
+  })
+  var groups = _.groupBy(valueArray)
+  var values = _.mapValues(groups, function(d) {
+    return d.length
+  })
+  var pairs = _.pairs(values)
+  var sortedData = _.sortBy(pairs, function(d) {
+    return -d[1]
+  })
+  var mostCommon = sortedData[0][0]
+
+  // Process to detect which locations had samples with the most common sample value and map
+  var plotPoints = _.map(items, function(d) {
+    var filterData = _.map(d['Samples'], function(f) {
+      if (parseFloat(f) == mostCommon) {
+        var latlng = [parseFloat(d.Latitude), parseFloat(d.Longitude)]
+        L.circle(latlng, 50, {color: 'green', fillColor: '#f03', fillOpacity: 0.5}).addTo(map)
+      }
+    })
+  })
+
+  return 'The traverse shown identifies samples where the most common sample value was detected'
 }
 
 function func10() {
-  // How does the desensity of valid sample values change across the geographical area?'
+  // How does the density of valid sample values change across the geographical area?'
   // use the brightness to indicate high number of valid sample values each
   // for each measurement, draw a marker,
   // use the brightness to represent the number of valid samples
   // the brighter a spot, the higher the number
   // for those measurements without a valid sample, draw nothing
-  return '...'
+
+  // A valid sample value is greater than 0.00000
+
+  var location = items[0]
+  var pos = [location.Latitude, location.Longitude]
+  var el = $(this).find('.viz')[0]    // lookup the element that will hold the map
+  $(el).height(500) // set the map to the desired height
+  var map = createMap(el, pos, 5)
+
+  // Will alter the fill opacity value to represent a scaled valid-value density
+
+  maxValidCount = 0
+  var validValues = _.map(items, function(d) {
+    var validCount = _.filter(d.Samples, function(f) {
+      return f > 0
+    }).length
+    if (validCount > maxValidCount) { maxValidCount = validCount }
+    return [ d.Latitude, d.Longitude, validCount ]
+  })
+  console.log('maxValidCount', maxValidCount)
+
+  var plotDensity = _.map(validValues, function(d) {
+    var latlng = [parseFloat(d[0]), parseFloat(d[1])]
+    var opacity = d[2]/maxValidCount
+    console.log('opacity', opacity)
+    L.circle(latlng, 50, { fillColor: '#f03', fillOpacity: opacity}).addTo(map)
+  })
+
+  return 'Fill opacity represents the scaled valid-value density (darker is more valid sample values); NOTE: Zoom-in to see opacity changes detail'
 }
 
 function func11() {
