@@ -18,6 +18,7 @@
         .ct-labels span {
           color: black;
           font-weight: bolder;
+          font-size: 14px;
         }
         #title {
           position: absolute;
@@ -98,8 +99,8 @@
 
   <div class="section white container flow-text">
     <div class="markdown">
-# Discussion
-Having **no cost data** makes all of these analyses suspect as maximizing MRR or BRR is simply a revenue maximization and not a profit optimization which must include costs of providing the services.  (Realize that cost data is very sensitive/proprietary though).
+# Discussion:
+Having **no cost data** makes all of these analyses suspect as maximizing MRR or BRR is simply a revenue maximization and not a profit optimization which must include costs of providing the services.
 
     </div>
   </div>
@@ -158,20 +159,11 @@ function solution1a() {
     }
     allmap.push({'Industry': d[0], 'Product': maxproduct})
   })
-  var filteredlow = _.filter(noServiceItems, function(d){
-    // return !(d.SalesVolume == '#N/A')
-    return ( !(d.SalesVolume == '#N/A') && (d['Delinquency  Rate'] == 'Low Risk') )
+  var filtered = _.filter(noServiceItems, function(d){
+    return !(d.SalesVolume == '#N/A')
   })
-  var filteredmed = _.filter(noServiceItems, function(d){
-    // return !(d.SalesVolume == '#N/A')
-    return ( !(d.SalesVolume == '#N/A') && (d['Delinquency  Rate'] == 'M') )
-  })
-  var filteredhigh = _.filter(noServiceItems, function(d){
-    // return !(d.SalesVolume == '#N/A')
-    return ( !(d.SalesVolume == '#N/A') && (d['Delinquency  Rate'] == 'High Risk') )
-  })
-  var groupslow = _.groupBy(filteredlow, 'Name/ID')
-  var maplow = _.mapValues(groupslow, function(d){
+  var groups = _.groupBy(filtered, 'Name/ID')
+  var map = _.mapValues(groups, function(d){
     var matchedproduct = 'No Matched Product'
     _.forEach(allmap, function(f){
       if(d[0].Industry == f.Industry){
@@ -180,74 +172,26 @@ function solution1a() {
     })
     return {'GrowthRate': parseFloat(_.pluck(d, 'SalesVolume')) * parseFloat(_.pluck(d, 'SalesTurnoverGrowthRate')), 'Product': matchedproduct}
   })
-  var groupsmed = _.groupBy(filteredmed, 'Name/ID')
-  var mapmed = _.mapValues(groupsmed, function(d){
-    var matchedproduct = 'No Matched Product'
-    _.forEach(allmap, function(f){
-      if(d[0].Industry == f.Industry){
-        matchedproduct = f.Product
-      }
-    })
-    return {'GrowthRate': parseFloat(_.pluck(d, 'SalesVolume')) * parseFloat(_.pluck(d, 'SalesTurnoverGrowthRate')), 'Product': matchedproduct}
-  })
-  var groupshigh = _.groupBy(filteredhigh, 'Name/ID')
-  var maphigh = _.mapValues(groupshigh, function(d){
-    var matchedproduct = 'No Matched Product'
-    _.forEach(allmap, function(f){
-      if(d[0].Industry == f.Industry){
-        matchedproduct = f.Product
-      }
-    })
-    return {'GrowthRate': parseFloat(_.pluck(d, 'SalesVolume')) * parseFloat(_.pluck(d, 'SalesTurnoverGrowthRate')), 'Product': matchedproduct}
-  })
-  valueslow = _.mapValues(maplow, function(d) {
+ 
+  values = _.mapValues(map, function(d) {
     return d.GrowthRate
   })
-  valuesmed = _.mapValues(mapmed, function(d) {
-    return d.GrowthRate
-  })
-  valueshigh = _.mapValues(maphigh, function(d) {
-    return d.GrowthRate
-  })
-  var sortedlow = _.take(_.sortBy(_.pairs(valueslow), function(d){
-    return -d[1]
-  }), 100)
-  var sortedmed = _.take(_.sortBy(_.pairs(valuesmed), function(d){
-    return -d[1]
-  }), 100)
-  var sortedhigh = _.take(_.sortBy(_.pairs(valueshigh), function(d){
-    return -d[1]
-  }), 100)
-  sortedlow = _.take(sortedlow, 10)
-  sortedmed = _.take(sortedmed, 10)
-  sortedhigh = _.take(sortedhigh, 10)
-  var chartSerieslow = _.map(sortedlow, function(d) { return d[1] })
-  var chartSeriesmed = _.map(sortedmed, function(d) { return d[1] })
-  var chartSerieshigh = _.map(sortedhigh, function(d) { return d[1] })
 
+  var sorted = _.take(_.sortBy(_.pairs(values), function(d){
+    return -d[1]
+  }), 100)
+
+  var chartLabels = _.map(sorted, function(d) { return d[0] })
+  var chartSeries = _.map(sorted, function(d) { return d[1] })
+  
   var data = {
-    labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    series: [chartSerieshigh, chartSeriesmed, chartSerieslow]
+    labels: _.take(chartLabels, 10),
+    series: [ _.take(chartSeries, 10) ]
   }
   new Chartist.Bar('#q1a .answer', data);
 
-  var strlow = ''
-  _.forEach(sortedlow, function(d) {
-    strlow += d[0] + ', '
-  })
-  var strmed = ''
-  _.forEach(sortedmed, function(d) {
-    strmed += d[0] + ', '
-  })
-  var strhigh = ''
-  _.forEach(sortedhigh, function(d) {
-    strhigh += d[0] + ', '
-  })
-
-  return '<i>Basis: Expected Growth in Dollars -> Sales Volume * Sales Growth Rate</i><br ><br >' + 'With the data given to us, the way we decided to order the account without services was not through total sales, but through their <b>expected growth of sales</b>. This method eliminates companies that are falling in sales and therefore may not have the resources to get a new service with Zayo due to cutbacks. Instead it prioritizes large companies that are <u>growing rapidly</u> and <u>have the resources available</u> to them to buy one of Zayo\'s products.<br ><br >' + '<b>High: </b>' + strhigh + '<br><b>Medium: </b>' + strmed + '<br><b>Low: </b>' + strlow + '<br><br> <DIV ALIGN=CENTER>Figure 1-1: Account ID vs Expected Growth in Dollars($) (defined as Sales Volume * Sales Growth Rate)<br><br></DIV>'
+  return '<i>Basis: Expected Growth in Dollars -> Sales Volume * Sales Growth Rate</i><br ><br >' + 'With the data given to us, the way we decided to order the account without services was not through total sales, but through their <b>expected growth of sales</b>. This method eliminates companies that are falling in sales and therefore may not have the resources to get a new service with Zayo due to cutbacks. Instead it prioritizes large companies that are <u>growing rapidly</u> and <u>have the resources available</u> to them to buy one of Zayo\'s products.<br ><br >' + '<DIV ALIGN=CENTER>Figure 1-1: Account ID vs Expected Growth in Dollars($) (defined as Sales Volume * Sales Growth Rate)<br><br></DIV>'
 }
-
-
 
 function solution1b() {
   // Of the Tranzact accounts without services, which accounts should Zayo prioritize and why?
@@ -314,8 +258,7 @@ function solution2a() {
   // Strategy 1: Highest Sales volume for no service
 
   var filtered = _.filter(noServiceItems, function(d){
-    // return !(d.SalesVolume == '#N/A')
-    return ( !(d.SalesVolume == '#N/A') && (d['Delinquency  Rate'] != 'High Risk') )
+    return !(d.SalesVolume == '#N/A')
   })
   // No Accounts
   var groups = _.groupBy(filtered, 'Name/ID')
@@ -368,7 +311,7 @@ function solution2b() {
   }
   new Chartist.Bar('#q2b .answer', data);
 
-  return '<i>Basis: lowest TotalMRR</i><br>' + str2
+  return '<i>Basis: lowest sales volume for serviced</i><br>' + str2
 }
 
 
@@ -665,7 +608,7 @@ function loadDataThenRunSolutions() {
         console.log('number of profileItems loaded:', profileItems.length)
         console.log('first profileItems', profileItems[0])
 
-        $.get('tranzact_NoServicesDeliquency.json')
+        $.get('tranzact_NoServices.json')
           .done(function(data) {
 
           noServiceItems = data

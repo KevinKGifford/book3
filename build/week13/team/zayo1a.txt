@@ -1,0 +1,110 @@
+function solution1a() {
+  // Of the Tranzact accounts without services, which accounts should Zayo prioritize and why?
+  // Strategy 1: Expected growth in dollars. Sales Volume * SalesTurnover. 
+  // Products are the most popular for a given industry
+  
+  var industries = _.groupBy(profileItems, 'Industry')
+  var industriesmap = _.mapValues(industries, function(d){
+    return _.pluck(d, 'Name/ID')
+  })
+  var products = _.groupBy(serviceItems, 'Product')
+  var productsmap = _.mapValues(products, function(d){
+    return _.pluck(d, 'Name/ID')
+  })
+  var induspairs = _.pairs(industriesmap)
+  var prodpairs = _.pairs(productsmap)
+  var allmap = []
+
+  _.forEach(induspairs, function(d){
+    var maxproduct = ''
+    var maxcount = 0
+    for(var j = 0; j < d[1].length; j++){
+      _.forEach(prodpairs, function(f){
+         count = 0
+         for(var k = 0; k< f[1].length; k++){
+           if(d[1][j] == f[1][k]){
+             count++
+           }
+         }
+         if(count > maxcount){
+           maxcount = count
+           maxproduct = f[0]
+         }
+      })
+    }
+    allmap.push({'Industry': d[0], 'Product': maxproduct})
+  })
+  var filteredlow = _.filter(noServiceItems, function(d){
+    // return !(d.SalesVolume == '#N/A')
+    return ( !(d.SalesVolume == '#N/A') && (d['Delinquency  Rate'] == 'Low Risk') )
+  })
+  var filteredmed = _.filter(noServiceItems, function(d){
+    // return !(d.SalesVolume == '#N/A')
+    return ( !(d.SalesVolume == '#N/A') && (d['Delinquency  Rate'] == 'M') )
+  })
+  var filteredhigh = _.filter(noServiceItems, function(d){
+    // return !(d.SalesVolume == '#N/A')
+    return ( !(d.SalesVolume == '#N/A') && (d['Delinquency  Rate'] == 'High Risk') )
+  })
+  var groupslow = _.groupBy(filteredlow, 'Name/ID')
+  var maplow = _.mapValues(groupslow, function(d){
+    var matchedproduct = 'No Matched Product'
+    _.forEach(allmap, function(f){
+      if(d[0].Industry == f.Industry){
+        matchedproduct = f.Product
+      }
+    })
+    return {'GrowthRate': parseFloat(_.pluck(d, 'SalesVolume')) * parseFloat(_.pluck(d, 'SalesTurnoverGrowthRate')), 'Product': matchedproduct}
+  })
+  var groupsmed = _.groupBy(filteredmed, 'Name/ID')
+  var mapmed = _.mapValues(groupsmed, function(d){
+    var matchedproduct = 'No Matched Product'
+    _.forEach(allmap, function(f){
+      if(d[0].Industry == f.Industry){
+        matchedproduct = f.Product
+      }
+    })
+    return {'GrowthRate': parseFloat(_.pluck(d, 'SalesVolume')) * parseFloat(_.pluck(d, 'SalesTurnoverGrowthRate')), 'Product': matchedproduct}
+  })
+  var groupshigh = _.groupBy(filteredhigh, 'Name/ID')
+  var maphigh = _.mapValues(groupshigh, function(d){
+    var matchedproduct = 'No Matched Product'
+    _.forEach(allmap, function(f){
+      if(d[0].Industry == f.Industry){
+        matchedproduct = f.Product
+      }
+    })
+    return {'GrowthRate': parseFloat(_.pluck(d, 'SalesVolume')) * parseFloat(_.pluck(d, 'SalesTurnoverGrowthRate')), 'Product': matchedproduct}
+  })
+  valueslow = _.mapValues(maplow, function(d) {
+    return d.GrowthRate
+  })
+  valuesmed = _.mapValues(mapmed, function(d) {
+    return d.GrowthRate
+  })
+  valueshigh = _.mapValues(maphigh, function(d) {
+    return d.GrowthRate
+  })
+  var sortedlow = _.take(_.sortBy(_.pairs(valueslow), function(d){
+    return -d[1]
+  }), 100)
+  var sortedmed = _.take(_.sortBy(_.pairs(valuesmed), function(d){
+    return -d[1]
+  }), 100)
+  var sortedhigh = _.take(_.sortBy(_.pairs(valueshigh), function(d){
+    return -d[1]
+  }), 100)
+  sortedlow = _.take(sortedlow, 10)
+  sortedmed = _.take(sortedmed, 10)
+  sortedhigh = _.take(sortedhigh, 10)
+  var chartSerieslow = _.map(sortedlow, function(d) { return d[1] })
+  var chartSeriesmed = _.map(sortedmed, function(d) { return d[1] })
+  var chartSerieshigh = _.map(sortedhigh, function(d) { return d[1] })
+  var data = {
+    labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    series: [chartSerieslow, chartSeriesmed, chartSerieshigh]
+  }
+  new Chartist.Bar('#q1a .answer', data);
+
+  return '<i>Basis: Expected Growth in Dollars -> Sales Volume * Sales Growth Rate</i><br ><br >' + 'With the data given to us, the way we decided to order the account without services was not through total sales, but through their <b>expected growth of sales</b>. This method eliminates companies that are falling in sales and therefore may not have the resources to get a new service with Zayo due to cutbacks. Instead it prioritizes large companies that are <u>growing rapidly</u> and <u>have the resources available</u> to them to buy one of Zayo\'s products.<br ><br >' + '<DIV ALIGN=CENTER>Figure 1-1: Account ID vs Expected Growth in Dollars($) (defined as Sales Volume * Sales Growth Rate)<br><br></DIV>'
+}
