@@ -1,0 +1,718 @@
+<html>
+<head>
+    <style>
+        .answer {
+            min-height: 50px
+        }
+        section{
+          padding: 10px;
+          margin-bottom: 12px
+        }
+        .parallax-container {
+          height: 300
+        }
+        .popup {
+            width: 500;
+            height: 500;
+        }
+        .ct-labels span {
+          color: black;
+          font-weight: bolder;
+        }
+        #title {
+          position: absolute;
+          padding: 20px;
+          font-size: 64px;
+          font-weight: bolder;
+          color: white;
+          top: 100px;
+          left: 0px;
+          text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black
+        }
+        #title .authors {
+          padding: 20px;
+          font-size: 32px;
+          font-weight: bolder;
+          color: #BBB;
+          text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black
+        }
+        #map { height: 1000px; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/css/materialize.min.css">
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.9.4/chartist.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+</head>
+<body>
+
+  <div class="parallax-container">
+    <div class="parallax">
+      <img src="zayo-numbers.png">
+    </div>
+  </div>
+
+  <div class="section white container flow-text">
+
+      <div id="questions" class="collection with-header">
+          <div class="collection-header"><b>Caleb Hsu, Parker Illig, Satchel Spencer, Kevin Gifford</b></div>
+          <section id="q1a" class="question collection-item">
+              <h4>Q1a: Of the Tranzact accounts without services, which accounts should Zayo prioritize and why?</h4>
+              <div class="answer"></div>
+          </section>
+          <section id="q1b" class="question collection-item">
+              <h4>Q1b: Of the Tranzact accounts without services, which accounts should Zayo prioritize and why?<br></h4>
+              <div class="answer"></div>
+          </section>
+          <section id="q2a" class="question collection-item">
+              <h4>Q2a: If Zayo sent quotes to all Tranzact accounts, how would you prioritize the customer account list? (And list the prioritized accounts from 1 to ####)<br></h4>
+              <div class="answer"></div>
+          </section>
+          <section id="q2b" class="question collection-item">
+              <h4>Q2b: If Zayo sent quotes to all Tranzact accounts, how would you prioritize the customer account list? (And list the prioritized accounts from 1 to ####)<br></h4>
+              <div class="answer"></div>
+          </section>
+          <section id="q3" class="question collection-item">
+              <h4>Q3: If Zayo only had 5 representatives, which states would you prioritize for in-person meetings?</h4>
+              <div class="answer"></div>
+          </section>
+          <section id="q4a" class="question collection-item">
+              <h4>Q4a: If Zayo only had enough team members to focus on two products, which products would you prioritize?</h4>
+              <div class="answer"></div>
+          </section>
+          <section id="q4b" class="question collection-item">
+              <h4>Q4b: If Zayo only had enough team members to focus on two products, which products would you prioritize?</h4>
+              <div class="answer"></div>
+          </section>
+          <section id="q5" class="question collection-item">
+              <h4>Q5: Of the Tranzact accounts that have services: What industries/verticals spend the most money and on what products/services?</h4>
+              <div class="answer"></div>
+          </section>
+  </div>
+
+  <div class="parallax-container" style="height:200px">
+    <div class="parallax">
+      <img src="zayo-numbers.png">
+    </div>
+  </div>
+
+
+  <div class="section white container flow-text">
+    <div class="markdown">
+# Discussion
+Having **no cost data** makes all of these analyses suspect as maximizing MRR or BRR is simply a revenue maximization and not a profit optimization which must include costs of providing the services.  (Realize that cost data is very sensitive/proprietary though).
+
+    </div>
+  </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.5/marked.min.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
+    <script src="http://bigdatahci2015.github.io/data/js/geolib.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.9.4/chartist.min.js"></script>
+    <script>
+
+// Global scope (i.e., can be accessed in javascript console)
+var serviceItems
+var profileItems
+var noServiceItems
+
+// Process data functions
+
+function solution1a() {
+  // Of the Tranzact accounts without services, which accounts should Zayo prioritize and why?
+  // Strategy 1: Expected growth in dollars. Sales Volume * SalesTurnover. 
+  // Products are the most popular for a given industry
+  
+  var industries = _.groupBy(profileItems, 'Industry')
+  var industriesmap = _.mapValues(industries, function(d){
+    return _.pluck(d, 'Name/ID')
+  })
+  var products = _.groupBy(serviceItems, 'Product')
+  var productsmap = _.mapValues(products, function(d){
+    return _.pluck(d, 'Name/ID')
+  })
+  var induspairs = _.pairs(industriesmap)
+  var prodpairs = _.pairs(productsmap)
+  var allmap = []
+
+  _.forEach(induspairs, function(d){
+    var maxproduct = ''
+    var maxcount = 0
+    for(var j = 0; j < d[1].length; j++){
+      _.forEach(prodpairs, function(f){
+         count = 0
+         for(var k = 0; k< f[1].length; k++){
+           if(d[1][j] == f[1][k]){
+             count++
+           }
+         }
+         if(count > maxcount){
+           maxcount = count
+           maxproduct = f[0]
+         }
+      })
+    }
+    allmap.push({'Industry': d[0], 'Product': maxproduct})
+  })
+  var filteredlow = _.filter(noServiceItems, function(d){
+    // return !(d.SalesVolume == '#N/A')
+    return ( !(d.SalesVolume == '#N/A') && (d['Delinquency  Rate'] == 'Low Risk') )
+  })
+  var filteredmed = _.filter(noServiceItems, function(d){
+    // return !(d.SalesVolume == '#N/A')
+    return ( !(d.SalesVolume == '#N/A') && (d['Delinquency  Rate'] == 'M') )
+  })
+  var filteredhigh = _.filter(noServiceItems, function(d){
+    // return !(d.SalesVolume == '#N/A')
+    return ( !(d.SalesVolume == '#N/A') && (d['Delinquency  Rate'] == 'High Risk') )
+  })
+  var groupslow = _.groupBy(filteredlow, 'Name/ID')
+  var maplow = _.mapValues(groupslow, function(d){
+    var matchedproduct = 'No Matched Product'
+    _.forEach(allmap, function(f){
+      if(d[0].Industry == f.Industry){
+        matchedproduct = f.Product
+      }
+    })
+    return {'GrowthRate': parseFloat(_.pluck(d, 'SalesVolume')) * parseFloat(_.pluck(d, 'SalesTurnoverGrowthRate')), 'Product': matchedproduct}
+  })
+  var groupsmed = _.groupBy(filteredmed, 'Name/ID')
+  var mapmed = _.mapValues(groupsmed, function(d){
+    var matchedproduct = 'No Matched Product'
+    _.forEach(allmap, function(f){
+      if(d[0].Industry == f.Industry){
+        matchedproduct = f.Product
+      }
+    })
+    return {'GrowthRate': parseFloat(_.pluck(d, 'SalesVolume')) * parseFloat(_.pluck(d, 'SalesTurnoverGrowthRate')), 'Product': matchedproduct}
+  })
+  var groupshigh = _.groupBy(filteredhigh, 'Name/ID')
+  var maphigh = _.mapValues(groupshigh, function(d){
+    var matchedproduct = 'No Matched Product'
+    _.forEach(allmap, function(f){
+      if(d[0].Industry == f.Industry){
+        matchedproduct = f.Product
+      }
+    })
+    return {'GrowthRate': parseFloat(_.pluck(d, 'SalesVolume')) * parseFloat(_.pluck(d, 'SalesTurnoverGrowthRate')), 'Product': matchedproduct}
+  })
+  valueslow = _.mapValues(maplow, function(d) {
+    return d.GrowthRate
+  })
+  valuesmed = _.mapValues(mapmed, function(d) {
+    return d.GrowthRate
+  })
+  valueshigh = _.mapValues(maphigh, function(d) {
+    return d.GrowthRate
+  })
+  var sortedlow = _.take(_.sortBy(_.pairs(valueslow), function(d){
+    return -d[1]
+  }), 100)
+  var sortedmed = _.take(_.sortBy(_.pairs(valuesmed), function(d){
+    return -d[1]
+  }), 100)
+  var sortedhigh = _.take(_.sortBy(_.pairs(valueshigh), function(d){
+    return -d[1]
+  }), 100)
+  sortedlow = _.take(sortedlow, 10)
+  sortedmed = _.take(sortedmed, 10)
+  sortedhigh = _.take(sortedhigh, 10)
+  var chartSerieslow = _.map(sortedlow, function(d) { return d[1] })
+  var chartSeriesmed = _.map(sortedmed, function(d) { return d[1] })
+  var chartSerieshigh = _.map(sortedhigh, function(d) { return d[1] })
+
+  var data = {
+    labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    series: [chartSerieshigh, chartSeriesmed, chartSerieslow]
+  }
+  new Chartist.Bar('#q1a .answer', data);
+
+  var strlow = ''
+  _.forEach(sortedlow, function(d) {
+    strlow += d[0] + ', '
+  })
+  var strmed = ''
+  _.forEach(sortedmed, function(d) {
+    strmed += d[0] + ', '
+  })
+  var strhigh = ''
+  _.forEach(sortedhigh, function(d) {
+    strhigh += d[0] + ', '
+  })
+
+  return '<i>Basis: Expected Growth in Dollars -> Sales Volume * Sales Growth Rate</i><br ><br >' + 'With the data given to us, the way we decided to order the account without services was not through total sales, but through their <b>expected growth of sales</b>. This method eliminates companies that are falling in sales and therefore may not have the resources to get a new service with Zayo due to cutbacks. Instead it prioritizes large companies that are <u>growing rapidly</u> and <u>have the resources available</u> to them to buy one of Zayo\'s products.<br ><br >' + '<b>High: </b>' + strhigh + '<br><b>Medium: </b>' + strmed + '<br><b>Low: </b>' + strlow + '<br><br> <DIV ALIGN=CENTER>Figure 1-1: Account ID vs Expected Growth in Dollars($) (defined as Sales Volume * Sales Growth Rate)<br><br></DIV>'
+}
+
+
+
+function solution1b() {
+  // Of the Tranzact accounts without services, which accounts should Zayo prioritize and why?
+  // Strategy 2: Go after current customers that don't have Colocation and/or DIA services
+  // Order by current customer combined account TotalMRR
+  // Based upon Zayo's stated goal to "Build up current customer base and sell them products"
+
+  var filteredServiceItems = _.filter(serviceItems, function(d) {
+    return d['Name/ID'] != ""
+  })
+  var groups = _.groupBy(filteredServiceItems, 'Name/ID')
+
+  var filteredGroups = _.filter(groups, function(d) {
+    var productArray = []
+    var account = ""
+    var customerMRR = _.round(_.sum(_.pluck(d, 'Total MRR')), 2)
+
+    data = _.map(d, function(f) {
+      var print = 0
+      account = f['Name/ID']
+      if (f['Name/ID'] == "10015" || f['Name/ID'] == "10034" || f['Name/ID'] == "10027") { print = 1 }
+      productArray[productArray.length] = f['Product']
+    })
+
+    if ((_.includes(_.uniq(productArray), 'DIA') && _.includes(_.uniq(productArray), 'Colocation'))) {
+    } else if (_.includes(_.uniq(productArray), 'Colocation')) {
+    } else if (_.includes(_.uniq(productArray), 'DIA')) {
+    } else {
+      return { "Account": account, "CustomerMRR": customerMRR }
+    }
+  })
+  console.log('filteredGroups.length', filteredGroups.length)
+
+  // Have all accounts that have neither Colocation or DIA
+  
+  var values = _.map(filteredGroups, function(d) {
+    var customerMRR =  _.round(_.sum(_.pluck(d, 'Total MRR')), 2)
+    // var accountID = _.flatten(_.uniq(_.pluck(d, 'Name/ID')))
+    var accountID = ""
+    var getID = _.map(d, function(f) {
+      accountID = f['Name/ID']
+    })
+    return [ accountID, customerMRR ]
+  })
+
+  var sorted_pairs = _.sortBy(values, function(d) {
+    return -d[1]
+  })
+
+  var chartLabels = _.map(sorted_pairs, function(d) { return d[0] })
+  var chartSeries = _.map(sorted_pairs, function(d) { return d[1] })
+  
+  var data = {
+    labels: _.take(chartLabels, 10),
+    series: [ _.take(chartSeries, 10) ]
+  }
+  new Chartist.Bar('#q1b .answer', data);
+
+  return '<p><i>Based upon Zayo\'s stated goal to "<b>build up current customer base and sell them products.</b>"</i><br />' + '<p>Displayed below are the <b>top 10</b> (in terms of customer Total MRR) accounts that have neither Colocation nor DIA product/services.  Since Zayo looks to build up the current customer base, we recommend going after current customers with neither Colocation nor DIA services. </p><br><DIV ALIGN=CENTER>Figure 1-2: Account ID vs customer TotalMRR ($) for accounts with neither Colocation nor DIA<br><br></DIV>'
+}
+
+function solution2a() {
+  // If Zayo sent quotes to all Tranzact accounts, how would you prioritize the customer account list?
+  // Strategy 1: Highest Sales volume for no service
+
+  var filtered = _.filter(noServiceItems, function(d){
+    // return !(d.SalesVolume == '#N/A')
+    return ( !(d.SalesVolume == '#N/A') && (d['Delinquency  Rate'] != 'High Risk') )
+  })
+  // No Accounts
+  var groups = _.groupBy(filtered, 'Name/ID')
+  var map = _.mapValues(groups, function(d){
+    return parseInt(_.pluck(d, 'SalesVolume'))
+  })
+  var sorted = _.sortBy(_.pairs(map), function(d){
+    return d[1]
+  }).reverse()
+
+  var str = '<b>No Services Accounts (Ordered Most to Least by Sales Volume)</b>: <br />'
+  _.forEach(sorted, function(d){
+    str += (d[0] + ', ')
+  })
+
+  var chartLabels = _.map(sorted, function(d) { return d[0] })
+  var chartSeries = _.map(sorted, function(d) { return d[1] })
+  
+  var data = {
+    labels: _.take(chartLabels, 10),
+    series: [ _.take(chartSeries, 10) ]
+  }
+  new Chartist.Bar('#q2a .answer', data);
+
+  return '<i>Basis: highest Sales volume for no service</i><br ><br >' + 'When prioritizing quotes to all Tranzact accounts, there is no data on the accounts currently with Zayo concerning their total sales. Therefore, we decided to first order all Tranzact accounts without services first simply by <b>high sales to low sales</b>. Since all we are doing is sending quotes, places with high volumes of revenue may pick up on the quotes if they are currently unhappy with their current services. After all the non-serviced accounts come the serviced accounts, although this time ordered from low MRR to high MRR. Since we don\'t have any total sales data on the accounts we do have, the best way to have accounts pick up new services is to reach out to the accounts that have the least amount of services with Zayo since they are far less likely to have all their service needs already met by Zayo. <br ><br >' + str
+}
+
+function solution2b() {
+  // If Zayo sent quotes to all Tranzact accounts, how would you prioritize the customer account list?
+  // Strategy 2: Lowest sales volume for serviced
+
+  // Accounts
+  var groups2 = _.groupBy(serviceItems, 'Name/ID')
+  var map2 = _.mapValues(groups2, function(d){
+    return _.sum(_.map(_.pluck(d, 'Total MRR'), _.parseInt))
+  })
+  var sorted2 = _.sortBy(_.pairs(map2), function(d){
+    return d[1]
+  })
+  var str2 = '<br/><b> Accounts With Services (Ordered Least to Most by MRR)</b>: <br />'
+  _.forEach(sorted2, function(d){
+    str2 += (d[0] + ', ')
+  })
+  var chartLabels = _.map(sorted2, function(d) { return d[0] })
+  var chartSeries = _.map(sorted2, function(d) { return d[1] })
+  
+  var data = {
+    labels: _.take(chartLabels, 10),
+    series: [ _.take(chartSeries, 10) ]
+  }
+  new Chartist.Bar('#q2b .answer', data);
+
+  return '<i>Basis: lowest TotalMRR</i><br>' + str2
+}
+
+
+function solution3() {
+  // If Zayo only had 5 representatives, which states would you prioritize for in-person meetings?
+  // Strategy #1: The states with the highest average 'Total MRR'
+  // Strategy #2: The states with the highest total 'Total MRR'
+
+  var filtered_data = _.filter(serviceItems, function(d) {
+    return d['State A'] != ""
+  })
+  var groups = _.groupBy(filtered_data, 'State A')
+  groups = _.mapValues(groups, function(d){
+      return _.round(_.sum(_.pluck(d, 'Total MRR')), 2)
+  })
+
+  var pairs = _.pairs(groups)
+  var sortedPairs = _.sortBy(pairs, function(d) {
+    return -d[1]
+  })
+  // Compute percentage of total accounts covered by the top 5 ranked states
+  
+  var filtered_state_data = _.filter(filtered_data, function(d) {
+    return d['State A'] == sortedPairs[0][0] || d['State A'] == sortedPairs[1][0] || d['State A'] == sortedPairs[2][0] || d['State A'] == sortedPairs[3][0] || d['State A'] == sortedPairs[4][0]
+  })
+  var percentCovered = (filtered_state_data.length/filtered_data.length)*100.0
+
+  var chartLabels = _.map(sortedPairs, function(d) { return d[0] })
+  var chartSeries = _.map(sortedPairs, function(d) { return d[1] })
+  
+  var data = {
+    labels: _.take(chartLabels, 8),
+    series: [ _.take(chartSeries, 8) ]
+  }
+  new Chartist.Bar('#q3 .answer', data);
+
+  // Text Analysis - Q3
+  return 'After looking at states with the <b>highest total Total MRR</b>, and assuming one Zayo employee per state, we recommend that Zayo prioritize:<br><br> <b>' + _.first(sortedPairs)[0] + '</b>, which has a total MRR of $' + _.first(sortedPairs)[1].toLocaleString() + '<br> <b>' + sortedPairs[1][0]+ '</b>, which has a total MRR of $' + sortedPairs[1][1].toLocaleString() + '<br> <b>' + sortedPairs[2][0]+ '</b>, which has a total MRR of $' + sortedPairs[2][1].toLocaleString() + '<br> <b>' + sortedPairs[3][0]+ '</b>, which has a total MRR of $' + sortedPairs[3][1].toLocaleString() + '<br> <b>' + sortedPairs[4][0]+ '</b>, which has a total MRR of $' + sortedPairs[4][1].toLocaleString() + '<br><br>NOTE: The top 5 states identified cover ' + _.round(percentCovered,2) + '% of the service accounts where State A != ""  <br><br><DIV ALIGN=CENTER>Figure 3-1: State vs. TotalMRR ($)<br><br></DIV>'
+
+}
+
+
+function solution4a() {
+  // If Zayo only had enough team members to focus on two products, 
+  // which products would you prioritize?
+  // Strategy #1: Products with the highest average 'Total MRR'
+
+  var groups = _.groupBy(serviceItems, 'Product')
+  groups = _.mapValues(groups, function(d){
+      var avg = _.round(_.sum(_.pluck(d, 'Total MRR'))/d.length, 2)
+      return avg
+  })
+  var pairs = _.pairs(groups)
+
+  var sortedPairs = _.sortBy(pairs, function(d) {
+    return -d[1]
+  })
+  var chartLabels = _.map(sortedPairs, function(d) { return d[0] })
+  var chartSeries = _.map(sortedPairs, function(d) { return d[1] })
+  
+  var data = {
+    labels: _.take(chartLabels, 8),
+    series: [ _.take(chartSeries, 8) ]
+  }
+  new Chartist.Bar('#q4a .answer', data);
+
+  // Text Analysis
+  return '<p><i>Basis: highest average Total MRR</i><br/></p>' + 'After looking at products with the <b>highest average Total MRR</b>, we recommend that Zayo prioritize <b>' + _.first(sortedPairs)[0] + '</b>, which has an average Total MRR of $' + _.first(sortedPairs)[1].toLocaleString() + ', and <b>' + sortedPairs[1][0] + '</b>, which has an average Total MRR of $' + sortedPairs[1][1].toLocaleString() + '. <br><br><DIV ALIGN=CENTER>Figure 4-1: Product vs. Average TotalMRR ($)<br><br></DIV>'
+
+}
+
+
+function solution4b() {
+  // If Zayo only had enough team members to focus on two products, 
+  // which products would you prioritize?
+  // Strategy #2: Products with the highest 'Total MRR'
+
+  var groups = _.groupBy(serviceItems, 'Product')
+  groups = _.mapValues(groups, function(d){
+      return _.round(_.sum(_.pluck(d, 'Total MRR')), 2)
+  })
+  var pairs = _.pairs(groups)
+
+  var sortedPairs = _.sortBy(pairs, function(d) {
+    return -d[1]
+  })
+  var chartLabels = _.map(sortedPairs, function(d) { return d[0] })
+  var chartSeries = _.map(sortedPairs, function(d) { return d[1] })
+  
+  var data = {
+    labels: _.take(chartLabels, 8),
+    series: [ _.take(chartSeries, 8) ]
+  }
+  new Chartist.Bar('#q4b .answer', data);
+
+  // Text Analysis
+  return '<p><i>Basis: highest Total MRR</i><br /></p>' + 'After looking at products with the <b>highest Total MRR</b>, we recommend that Zayo prioritize <b>' + _.first(sortedPairs)[0] + '</b>, which has an Total MRR of $' + _.first(sortedPairs)[1].toLocaleString() + ', and <b>' + sortedPairs[1][0] + '</b>, which has an Total MRR of $' + sortedPairs[1][1].toLocaleString() + '. <br><br><DIV ALIGN=CENTER>Figure 4-2: Product vs. TotalMRR ($)<br><br></DIV>'
+}
+
+
+function solution5() {
+  // Of the Tranzact accounts that have services: What industries/verticals 
+  // spend the most money and on what products/services?
+
+  // q5 print control
+  var print = 0
+
+  // Group the profileItems by "Industry"
+  var industryGroups = _.groupBy(profileItems, 'Industry')
+
+  // Subgroup the profileItems grouped by "Industry" by "Vertical"
+  var industryVertical = _.map(industryGroups, function(d) {
+    return _.groupBy(d, 'Vertical')
+  })
+
+  var integratedFields = _.map(industryVertical, function(d) {
+
+    var vertical = _.map(d, function(f) {
+      var sumBRR = 0
+      var cnt = 0
+      var Industry
+      var Vertical
+      var accountArray = []
+      var zeroArray = []
+      var pick = 0
+      var fields = _.map(f, function(g) {
+        if (pick == 0) {
+          Industry = g['Industry']
+          Vertical = g['Vertical']
+          pick++
+        }
+        sumBRR += parseFloat(g['Total BRR'])
+        if (parseInt(g['Total BRR']) == 0) { zeroArray[zeroArray.length] = g['Name/ID'] }
+        else { accountArray[accountArray.length] = g['Name/ID'] }
+        cnt++
+      })
+
+      if (print) { console.log('==> ' + Industry +'/' + Vertical + ': TOTAL BRR = ' + sumBRR + ' AVERAGE BRR = ', _.round(sumBRR/cnt, 2)) }
+      // if (print) { console.log('accountArray', accountArray) }
+      var IndustryVertical = Industry +'/' + Vertical
+      var totalBRR = sumBRR
+      var averageBRR = _.round(sumBRR/cnt, 2)
+
+      // For each ID in Accounts[] get the Product and Total MRR from serviceItems data set
+      var serviceData =  _.map(accountArray, function(i) {
+        return _.filter(serviceItems, function(j) {
+          return j['Name/ID'] == i
+        })
+      })
+
+      var productArray = []
+      var MRRArray = []
+      var totalMRR = 0
+      var productMRR = _.map(serviceData, function(d) {
+        var items = _.map(d, function(f) {
+          productArray[productArray.length] = f['Product']
+          MRRArray[MRRArray.length] = f['Total MRR']
+          totalMRR += parseFloat(f['Total MRR'])
+        })
+      })
+
+      // Compute the TotalMRR of all Products for the Industry/Vertical
+      var industryVerticalProductMRR = _.map(_.zip(productArray, MRRArray), function(d) {
+        return { "Product": d[0], "ProductMRR": d[1] }
+      })
+      // if (print) { console.log('industryVerticalProductMRR', industryVerticalProductMRR) }
+ 
+      // Compute the TotalMRR for each unique product for the Industry/Vertical
+      var uniqueProduct = _.uniq(productArray)
+      if (print) { console.log('uniqueProduct', uniqueProduct) }
+
+      var sumArray = []
+      var n = 0
+      var uniqueProductMRR = _.map(uniqueProduct, function(d) {
+        var sumTotal = 0
+        var matchProduct = _.map(_.zip(productArray, MRRArray), function(f) {
+          if ( f[0] == d ) { sumTotal += parseFloat(f[1]) }
+        })
+        sumArray[n] = sumTotal
+        n++
+        return { "Product": d, "ProductMRR": _.round(sumArray[n-1],2) }
+      })
+      if (print) { console.log('uniqueProductMRR', uniqueProductMRR) }
+      
+      var sortedPairs = _.sortBy(uniqueProductMRR, function(d) {
+        return -d['ProductMRR']
+      })
+      if (print) { console.log('sortedPairs', sortedPairs) }
+      
+      if (print) {
+        console.log('==> ' + IndustryVertical + '(' + accountArray.length + ')  Total MRR: ' + _.round(totalMRR,2))
+        console.log('==> ' + 'on Products: ' + _.uniq(productArray))
+      }
+
+      return { "Industry": Industry, "Vertical": Vertical, "Industry/Vertical": IndustryVertical, "TotalBRR": totalBRR, "AverageBRR": averageBRR, "Accounts": accountArray, "ZeroAccounts": zeroArray, "Products": productArray, "ProductMRR": MRRArray, "ProductCombinedMRR": sortedPairs, "Industry/VerticalTotalMRR": _.round(totalMRR,2), "Services": serviceData }
+    })
+    if (print) { console.log('vertical', vertical) }
+    if (print) { console.log('        ') }
+    return vertical
+  })
+  if (print) { console.log('integratedFields', integratedFields) }
+
+  // Generate data for visualizations from global var integrated fields
+  // Viz-1: Industry/Vertical vs. Industry/VerticalTotalMRR
+
+  // integratedFields is an array of arrays of objects; build the chartLabels
+  // and chartSeries arrays for plotting via Chartist
+
+  var Labels = _.map(integratedFields, function(d) {
+    return _.map(d, function(f) {
+      return f['Industry/Vertical']
+    })
+  })
+  var Series1 = _.map(integratedFields, function(d) {
+    return _.map(d, function(f) {
+      return f['Industry/VerticalTotalMRR']
+    })
+  })
+  if (print) { console.log('Series1', Series1) }
+
+  var pairs = _.zip(_.flatten(Labels), _.flatten(Series1))
+  var sortedPairs = _.sortBy(pairs, function(d) {
+    return -d[1]
+  })
+  if (print) { console.log('sortedPairs', sortedPairs) }
+  var chartLabels = _.take(_.map(sortedPairs, function(d) { return d[0] }), 6)
+  if (print) { console.log('chartLabels', chartLabels) }
+  var chartSeries1 = _.take(_.map(sortedPairs, function(d) { return d[1] }), 6)
+  if (print) { console.log('chartSeries1', chartSeries1) }
+
+  // Build the arrays to display the top two products alongside the Industry/Vertical TotalMRR
+  // Need to follow chartLabels order for proper plotting results
+
+  var chartSeries2a = []
+  var chartSeries3a = []
+  var labels = _.map(chartLabels, function(l) {
+    var data = _.map(integratedFields, function(d) {
+      var data2 = _.map(d, function(f) {
+        if (l == f['Industry/Vertical']) {
+          var findProduct = _.map(f.ProductCombinedMRR, function(g) {
+            if (g.Product == 'DIA') {
+              chartSeries2a[chartSeries2a.length] = parseFloat(g.ProductMRR)
+            }
+            else if (g.Product == 'Colocation') {
+              chartSeries3a[chartSeries3a.length] = parseFloat(g.ProductMRR)
+            }
+          })
+        }
+      })
+    })
+  })
+  if (print) { console.log('chartSeries2a', chartSeries2a) }
+  if (print) { console.log('chartSeries3a', chartSeries3a) }
+  
+  var data = {
+    labels: chartLabels,
+    series: [ chartSeries1, chartSeries2a, chartSeries3a ]
+  }
+  new Chartist.Bar('#q5 .answer', data);
+
+  // noServiceItems access
+  var noServiceGroups = _.groupBy(noServiceItems, 'Name/ID')
+
+  // Text Analysis
+  // since some industry names have /, which causes confusion between the industry and product
+  if ((_.first(sortedPairs)[0].split("/")).length == 3)
+    var industryName = _.first(sortedPairs)[0].split("/")[0] + ' / ' + _.first(sortedPairs)[0].split("/")[1]
+  else 
+    var industryName = _.first(sortedPairs)[0].split("/")[0]
+
+  return 'According to our analysis, the industry that currently spends the most is the <b>' +  industryName + '</b> industry on <b>' + _.last(_.first(sortedPairs)[0].split("/")) + '</b>. <br><br><DIV ALIGN=CENTER>Figure 5-1: { Industry/Vertical | DIA | Colocation } vs. TotalMRR ($)<br><br></DIV>'
+
+}
+
+function run(id, solutionFunc, data) {
+    console.log('run solution for ' + id)
+    var answer = solutionFunc(data)
+    $(id).find('.answer').html(answer)
+}
+
+function loadDataThenRunSolutions() {
+
+  $.get('tranzact_services.json')
+    .done(function(data) {
+
+    serviceItems = data
+    console.log('number of serviceItems loaded:', serviceItems.length)
+    console.log('first serviceItems', serviceItems[0])
+
+    $.get('tranzact_profiles.json')
+      .done(function(data) {
+
+        profileItems = data
+        console.log('number of profileItems loaded:', profileItems.length)
+        console.log('first profileItems', profileItems[0])
+
+        $.get('tranzact_NoServicesDeliquency.json')
+          .done(function(data) {
+
+          noServiceItems = data
+          console.log('number of noServiceItems loaded:', noServiceItems.length)
+          console.log('first noServiceItems', noServiceItems[0])
+
+          run('#q1a', solution1a, serviceItems)
+          run('#q1b', solution1b, noServiceItems)
+          run('#q2a', solution2a, noServiceItems)
+          run('#q2b', solution2b, serviceItems)
+          run('#q3', solution3, profileItems)
+          run('#q4a', solution4a, serviceItems)
+          run('#q4b', solution4b, serviceItems)
+          run('#q5', solution5, serviceItems)
+
+        })
+        .fail(function(err) {
+          console.error(err)
+        })
+
+      })
+      .fail(function(err) {
+        console.error(err)
+      })
+
+    })
+    .fail(function(err) {
+        console.error(err)
+    })
+
+}
+
+loadDataThenRunSolutions()
+
+// convert Markdown to html
+$('.markdown').each(function(){
+  var markdownText = $(this).text()
+  $(this).html(marked(markdownText))
+})
+
+// initialize the parallax effect
+$(document).ready(function(){
+  console.log($('.parallax').html())
+    $('.parallax').parallax()
+})
+
+    </script>
+
+</body>
+</html>
