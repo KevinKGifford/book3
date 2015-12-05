@@ -12,14 +12,11 @@ layout: layout.hbs
 * [Week 11](week11/individual)
 * [Week 12](week12/)
 * [Week 13](week13/)
+* [Week 14](week14/)
 
 ## Hackathons
 
 * [Business Location](hackathons/business-location)
 * [Twitter Events](hackathons/twitter)
 * [Bitcoin Trading](hackathons/bitcoin)
-<<<<<<< HEAD
-* [Zayo](hackathons/zayo)
-=======
 * [Google Books](hackathons/googlebooks)
->>>>>>> upstream/master
