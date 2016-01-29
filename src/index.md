@@ -2,8 +2,11 @@
 layout: layout.hbs
 ---
 
-# Book 3
+# RFID Tag-Encoding 
+* [RFID Inventory Data](RFIDData/)
+* [TestRepo](testrepo/)
 
+## Book 3
 
 ## Learning
 
